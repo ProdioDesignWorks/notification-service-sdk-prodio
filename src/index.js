@@ -13,15 +13,21 @@ const {
   TOKEN_TYPES,
 } = require('./config/constant.js');
 
-function notificationModule(payload,baseUrl) {
-  // this.checkConfig = function () {
-  //   return this.config.BASE_URL !== '';
-  // }
+function notificationModule(payload, baseUrl) {
   this.createUser = function (payload, baseUrl) {
-    createNotificationConsumer(payload, baseUrl).then(userResponse => {
-      console.log("userResponse",JSON.stringify(userResponse));
-      let email = userResponse.data.meta_info.email;
-      let userName = userResponse.data.meta_info.name;
+    createNotificationConsumer(payload, baseUrl);
+  };
+}
+
+//creating user in  notification consumer model.
+const createNotificationConsumer = function (payload, baseUrl) {
+
+  let url = `${baseUrl}notification-consumers`;
+  axios.post(url, payload).then(response => {
+    console.log("user_created", response);
+    if (response.status === 200) {
+      let email = response.data.meta_info.email;
+      let userName = response.data.meta_info.name;
       const templateBody = {
         "title": `${userName}_Template`,
         "body": `Welcome ${userName}`
@@ -40,98 +46,58 @@ function notificationModule(payload,baseUrl) {
           }
         ]
       };
-      createEvent(eventPayload).then(eventResponse => {
-        if (eventResponse.status === 200) {
-          let event_id = eventResponse.data.id;
-          const sendMailBody = {
-            "email": email
-          };
-          sendMail(event_id, sendMailBody).then(emailSent => {
-            console.log("Email sent successfully.");
-            return (JSON.stringify(userResponse));
-          }).catch(e => {
-            return (JSON.stringify(e));
-          });
-        }
-      }).catch(e => {
-        return (JSON.stringify(e));
-      })
-    }).catch(e => {
-      return (JSON.stringify(e));
-    });
-  }
-}
+      createEvent(eventPayload,email);
+      console.log("111111");
+    }
+    else {
+      console.log("222222");
 
-//creating user in  notification consumer model.
-const createNotificationConsumer = function (payload, baseUrl) {
-  // const hasConfigured = this.checkConfig();
-  // if (!hasConfigured) {
-  //   throw new Error('Configuration failed');
-  // }
-  return new Promise((resolve, reject) => {
-    let url = `${baseUrl}notification-consumers`;
-    try {
-      axios.post(url, payload).then(response => {
-        console.log("user_created", response);
-        if (response.status === 200) {
-          // createEvent(eventPayload);
-          console.log("111111");
-          resolve(response);
-        }
-        else {
-          console.log("222222");
-          reject(JSON.stringify(error));
-        }
-      }).catch((error) => {
-        console.log("333333");
-        reject(JSON.stringify(error));
-      });
     }
-    catch (e) {
-      console.log("4444444");
-      reject(JSON.stringify(e));
-    }
-  })
+  }).catch((error) => {
+    console.log("333333",error);
+
+  });
 }
 
 // creating event in notification consumer model.
-const createEvent = function (payload) {
-  return new Promise((resolve, reject) => {
-    let url = `${BASE_URL}notification-consumers/createevent`;
-    axios.post(url, payload).then(response => {
-      if (response.status === 200) {
-        // sendMail(sendMailBody, eventId);
-        resolve(response);
+const createEvent = function (payload,email) {
+
+  let url = `${BASE_URL}notification-consumers/createevent`;
+  axios.post(url, payload).then(response => {
+    if (response.status === 200) {
+      console.log("event Response", response);
+      let eventId = response.data.id;
+      const sendMailBody = {
+        "email":email
       }
-      else {
-        console.log(JSON.stringify(response));
-        reject(JSON.stringify(response));
-      }
-    }).catch(error => {
-      console.log(JSON.stringify(error));
-      reject(JSON.stringify(error));
-    });
+      sendMail(sendMailBody, eventId);
+
+    }
+    else {
+      console.log("event",response);
+
+    }
+
+  }).catch(error=>{
+    console.log("eventError",error);
   });
 }
 
 //sending mails to user created in notification consumer model.
 const sendMail = function (sendMailBody, event_id) {
-  return new Promise((resolve, reject) => {
-    let url = `${BASE_URL}notification-consumers/${event_id}`;
-    axios.post(url, sendMailBody).then(response => {
-      if (response.status === 200) {
-        resolve(response);
-        console.log(response.data);
-      }
-      else {
-        reject(JSON.stringify(response));
-      }
-    })
-      .catch(error => {
-        reject(JSON.stringify(error));
-        console.log(error);
-      })
-  });
+
+  let url = `${BASE_URL}notification-consumers/${event_id}`;
+  axios.post(url, sendMailBody).then(response => {
+    if (response.status === 200) {
+        console.log("response",response);
+        console.log("mail sent successfully");
+    }
+    else {
+    }
+  }).catch(error=>{
+    console.log("mail error",error);
+  })
+
 }
 
 module.exports = notificationModule;
