@@ -116,19 +116,12 @@ let  createUser = notificationModule.createUser(payload);
 
 ### Payload
 
-  
-  
-
 | Prop | Type | Description|
-
-|:--------------------:|:----------------------------------------------------------------------------:|:-----------|
-
+:--------------------:|:----------------------------------------------------------------------------:|:-----------|
 | `userId` | string |unique Identity Id of the user created| |
-
 | `Email` | string | Email address of the user created. |
-
 | `Name` | string| Name of the user created |
-| Event_Name | string | Event name for creating events for  | 
+| Event_Name | string | Event name for creating events for notification module  | 
 
 ### Method
 
