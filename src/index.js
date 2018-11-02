@@ -33,7 +33,7 @@ const createNotificationConsumer = function (payload, baseUrl) {
         "body": `Welcome ${userName}`
       };
       const eventPayload = {
-        "name": payload.Event_Name.toUpperCase(),
+        "name": payload.EVENT_NAME,
         "created_at": new Date(),
         "updated_at": new Date(),
         "_templates": [
