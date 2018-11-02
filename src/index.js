@@ -24,13 +24,13 @@ export default class notificationModule {
     return this.config.BASE_URL !== '';
   }
   //creating user in  notification consumer model.
-  createNotificationConsumer(payload){
-    const hasConfigured = this.checkConfig();
-    if (!hasConfigured) {
-      throw new Error('Configuration failed');
-    }
+  createNotificationConsumer(payload,baseUrl){
+    // const hasConfigured = this.checkConfig();
+    // if (!hasConfigured) {
+    //   throw new Error('Configuration failed');
+    // }
     return new Promise((resolve, reject) => {
-      let url = `${BASE_URL}notification-consumers`;
+      let url = `${baseUrl}notification-consumers`;
       try {
         axios.post(Url, payload).then(response => {
           console.log("user_created", response);
@@ -91,8 +91,8 @@ export default class notificationModule {
     });
   }
 
-  createUser(payload){
-    this.createNotificationConsumer(payload).then(userResponse => {
+  createUser(payload,baseUrl){
+    this.createNotificationConsumer(payload,baseUrl).then(userResponse => {
       let email = userResponse.data.data.meta_info.email;
       let userName = userResponse.data.data.meta_info.name;
             const templateBody = {

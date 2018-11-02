@@ -91,12 +91,8 @@ This application will run as a separate micro-service independent of your produc
 
 ```JSX
 
-	var  notificationModule = require('prodio-notification-sdk');
-	//config
-	const config = {
-	 "BASE_URL":"API GATE_WAY LINK"
-	};
-	var  notificationObject = notificationModule(config);
+	var  notificationModule = require('notification-service-sdk-prodio');
+	//confi
 	//create user in notification module
 	const meta_info = {
 	     "user_name":"user_name",
@@ -107,8 +103,9 @@ This application will run as a separate micro-service independent of your produc
 	"meta_info":meta_info,
 	"event_name":"CREATE_USER"
 	};
+	const baseUrl = "API GATEWAY LINK"
 
-let  createUser = notificationModule.createUser(payload);
+let  createUser = notificationModule.createUser(payload,baseUrl);
 
   
 
