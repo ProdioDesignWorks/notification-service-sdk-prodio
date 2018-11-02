@@ -14,9 +14,9 @@ const {
 } = require('./config/constant.js');
 
 function notificationModule(payload, url) {
-  this.checkConfig = function () {
-    return this.config.BASE_URL !== '';
-  }
+  // this.checkConfig = function () {
+  //   return this.config.BASE_URL !== '';
+  // }
   this.createUser = function (payload, baseUrl) {
     createNotificationConsumer(payload, baseUrl).then(userResponse => {
       let email = userResponse.data.meta_info.email;
@@ -70,7 +70,7 @@ const createNotificationConsumer = function (payload, baseUrl) {
   return new Promise((resolve, reject) => {
     let url = `${baseUrl}notification-consumers`;
     try {
-      axios.post(Url, payload).then(response => {
+      axios.post(url, payload).then(response => {
         console.log("user_created", response);
         if (response.status === 200) {
           // createEvent(eventPayload);
