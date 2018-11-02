@@ -1,6 +1,6 @@
 {
   "name": "notification-service-sdk-prodio",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Sdk for consuming prodio notification service",
   "main": "lib/index.js",
   "scripts": {

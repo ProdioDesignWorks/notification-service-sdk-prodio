@@ -1,6 +1,5 @@
 
 // eslint-disable-next-line import/prefer-default-export
-import restConfig from "./restConfig";
 const axios = require('axios');
 const BASE_URL = `https://47ha2doy85.execute-api.us-east-1.amazonaws.com/dev/`;
 const {
