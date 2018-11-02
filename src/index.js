@@ -13,12 +13,13 @@ const {
   TOKEN_TYPES,
 } = require('./config/constant.js');
 
-function notificationModule(payload, url) {
+function notificationModule(payload,baseUrl) {
   // this.checkConfig = function () {
   //   return this.config.BASE_URL !== '';
   // }
   this.createUser = function (payload, baseUrl) {
     createNotificationConsumer(payload, baseUrl).then(userResponse => {
+      console.log("userResponse",JSON.stringify(userResponse));
       let email = userResponse.data.meta_info.email;
       let userName = userResponse.data.meta_info.name;
       const templateBody = {
@@ -33,7 +34,7 @@ function notificationModule(payload, url) {
           {
             "name": EMAIL_NOTIFICATION_TEMPLATE,
             "type": EMAIL_NOTIFICATION_TEMPLATE,
-            "body": templateBody,
+            "body": JSON.stringify(templateBody),
             "created_at": new Date(),
             "updated_at": new Date()
           }
@@ -74,16 +75,20 @@ const createNotificationConsumer = function (payload, baseUrl) {
         console.log("user_created", response);
         if (response.status === 200) {
           // createEvent(eventPayload);
-          resolve(JSON.stringify(response));
+          console.log("111111");
+          resolve(response);
         }
         else {
+          console.log("222222");
           reject(JSON.stringify(error));
         }
       }).catch((error) => {
+        console.log("333333");
         reject(JSON.stringify(error));
       });
     }
     catch (e) {
+      console.log("4444444");
       reject(JSON.stringify(e));
     }
   })
@@ -96,7 +101,7 @@ const createEvent = function (payload) {
     axios.post(url, payload).then(response => {
       if (response.status === 200) {
         // sendMail(sendMailBody, eventId);
-        resolve(JSON.stringify(response));
+        resolve(response);
       }
       else {
         console.log(JSON.stringify(response));
@@ -115,7 +120,7 @@ const sendMail = function (sendMailBody, event_id) {
     let url = `${BASE_URL}notification-consumers/${event_id}`;
     axios.post(url, sendMailBody).then(response => {
       if (response.status === 200) {
-        resolve(JSON.stringify(response));
+        resolve(response);
         console.log(response.data);
       }
       else {
