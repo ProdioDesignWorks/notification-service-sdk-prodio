@@ -92,7 +92,7 @@ export default class notificationModule {
     });
   }
 
-  createUser = (payload) => {
+  createUser(payload){
     this.createNotificationConsumer(payload).then(userResponse => {
       let email = userResponse.data.data.meta_info.email;
       let userName = userResponse.data.data.meta_info.name;
