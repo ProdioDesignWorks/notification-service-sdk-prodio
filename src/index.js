@@ -15,7 +15,7 @@ const {
 } = require('./config/constant.js');
 export default class notificationModule {
   constructor(props) {
-    this.config = { ...props };
+    this.config = props;
     this.sendMail = this.sendMail.bind(this);
     this.createEvent = this.createEvent.bind(this);
     this.createNotificationConsumer = this.createNotificationConsumer.bind(this);

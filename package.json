@@ -1,5 +1,5 @@
 {
-  "name": "prodio-notification-sdk",
+  "name": "notification-service-sdk-prodio",
   "version": "1.0.0",
   "description": "Sdk for consuming prodio notification service",
   "main": "lib/index.js",
