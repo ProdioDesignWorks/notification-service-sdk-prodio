@@ -1,5 +1,5 @@
 {
-  "name": "prodio-notification-sdk",
+  "name": "notification-service-sdk-prodio",
   "version": "1.0.0",
   "description": "Sdk for consuming prodio notification service",
   "main": "lib/index.js",
@@ -35,7 +35,9 @@
     "url": "https://github.com/ProdioDesignWorks/prodio-notification-sdk/issues"
   },
   "homepage": "https://github.com/ProdioDesignWorks/prodio-notification-sdk#readme",
-  "dependencies": {},
+  "dependencies": {
+    "axios": "^0.18.0"
+  },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
