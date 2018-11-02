@@ -13,53 +13,53 @@ const {
   TOKEN_TYPES,
 } = require('./config/constant.js');
 
-module.exports = notificationModule;
-notificationModule.checkConfig = function () {
-  return this.config.BASE_URL !== '';
-}
-notificationModule.createUser = function (payload, baseUrl) {
-  createNotificationConsumer(payload, baseUrl).then(userResponse => {
-    let email = userResponse.data.data.meta_info.email;
-    let userName = userResponse.data.data.meta_info.name;
-    const templateBody = {
-      "title": `${userName}_Template`,
-      "body": `Welcome ${userName}`
-    };
-    const eventPayload = {
-      "name": payload.Event_Name,
-      "created_at": new Date(),
-      "updated_at": new Date(),
-      "_templates": [
-        {
-          "name": EMAIL_NOTIFICATION_TEMPLATE,
-          "type": EMAIL_NOTIFICATION_TEMPLATE,
-          "body": templateBody,
-          "created_at": new Date(),
-          "updated_at": new Date()
+function notificationModule(payload, url) {
+  this.checkConfig = function () {
+    return this.config.BASE_URL !== '';
+  }
+  this.createUser = function (payload, baseUrl) {
+    createNotificationConsumer(payload, baseUrl).then(userResponse => {
+      let email = userResponse.data.data.meta_info.email;
+      let userName = userResponse.data.data.meta_info.name;
+      const templateBody = {
+        "title": `${userName}_Template`,
+        "body": `Welcome ${userName}`
+      };
+      const eventPayload = {
+        "name": payload.Event_Name,
+        "created_at": new Date(),
+        "updated_at": new Date(),
+        "_templates": [
+          {
+            "name": EMAIL_NOTIFICATION_TEMPLATE,
+            "type": EMAIL_NOTIFICATION_TEMPLATE,
+            "body": templateBody,
+            "created_at": new Date(),
+            "updated_at": new Date()
+          }
+        ]
+      };
+      createEvent(eventPayload).then(eventResponse => {
+        if (eventResponse.data.status) {
+          let event_id = eventResponse.data.data.id;
+          const sendMailBody = {
+            "email": email
+          };
+          sendMail(event_id, sendMailBody).then(emailSent => {
+            console.log("Email sent successfully.");
+            return (JSON.stringify(userResponse));
+          }).catch(e => {
+            return (JSON.stringify(e));
+          });
         }
-      ]
-    };
-    this.createEvent(eventPayload).then(eventResponse => {
-      if (eventResponse.data.status) {
-        let event_id = eventResponse.data.data.id;
-        const sendMailBody = {
-          "email": email
-        };
-        this.sendMail(event_id, sendMailBody).then(emailSent => {
-          console.log("Email sent successfully.");
-          return (JSON.stringify(userResponse));
-        }).catch(e => {
-          return (JSON.stringify(e));
-        });
-      }
+      }).catch(e => {
+        return (JSON.stringify(e));
+      })
     }).catch(e => {
       return (JSON.stringify(e));
-    })
-  }).catch(e => {
-    return (JSON.stringify(e));
-  });
+    });
+  }
 }
-
 
 //creating user in  notification consumer model.
 const createNotificationConsumer = function (payload, baseUrl) {
@@ -129,3 +129,4 @@ const sendMail = function (sendMailBody, event_id) {
   });
 }
 
+module.exports = notificationModule;
