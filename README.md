@@ -61,7 +61,7 @@ This project is started with an aim to reduce implementing and re-architecting c
 
   
 
-$ npm install prodio-notification-sdk --save
+$ npm install notification-service-sdk-prodio --save
 
   
 
@@ -101,7 +101,7 @@ This application will run as a separate micro-service independent of your produc
 	const  payload = {
 	"userId":"user_id",
 	"meta_info":meta_info,
-	"event_name":"CREATE_USER"
+	"EVENT_NAME":"CREATE_USER"
 	};
 	const baseUrl = "API GATEWAY LINK"
 
@@ -118,7 +118,7 @@ let  createUser = notificationModule.createUser(payload,baseUrl);
 | `userId` | string |unique Identity Id of the user created| |
 | `Email` | string | Email address of the user created. |
 | `Name` | string| Name of the user created |
-| Event_Name | string | Event name for creating events for notification module  | 
+| `Event_Name` | string | Event name for creating events for notification module  | 
 
 ### Method
 
