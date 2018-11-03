@@ -5,7 +5,7 @@
 
   
 
-# prodio-notification-service-sdk
+# notification-service-sdk-prodio
 
   
 
