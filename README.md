@@ -21,7 +21,7 @@
 
   
 
-`prodio-notification-service-sdk` is an  node js client for the  `prodio-notification-service API`. Integrate in to any application to send emails, sms, and push app notifications to both mobile phones and web browsers.
+`notification-service-sdk-prodio` is an  node js client for the  `prodio-notification-service API`. Integrate in to any application to send emails, sms, and push app notifications to both mobile phones and web browsers.
 
   
 
@@ -64,11 +64,11 @@ This project is started with an aim to reduce implementing and re-architecting c
 
 # Installation
 
-$ npm install prodio-notification-service-sdk --save
+$ npm install notification-service-sdk-prodio--save
 
   
 # Initialization 
-Require the prodio-notification-service-sdk module and initialize the notificationSdk client, passing your base_url  as the first argument.
+Require the notification-service-sdk-prodio module and initialize the notificationSdk client, passing your base_url  as the first argument.
 ```JSX
 
  var  notificationSdk = require('notification-service-sdk-prodio');
