@@ -51,11 +51,19 @@ This project is started with an aim to reduce implementing and re-architecting c
 * Link templates with events
 * Send Push notifications by triggering events
 
+# Prerequisite:
+ * Clone this repository on your server git clone https://github.com/ProdioDesignWorks/prodio-notification-service.git
+ * Navigate to your repo cd prodio-notification-service
+ * Install dependencies npm install
+ * Start service node . or npm start or node server/server.js
+ * Open http://localhost:3000/explorer/ in your browser
+ * If you've pm2 installed then use this pm2 start server/server.js --name="NOTIFICATION_SERVICE"
 
+# Note:
+`prodio-notification-service` uses loopback as the core framework for developing API's, so all customisations, configurations, middlewares, events, and db connectors can be used which you would have used in loopback.
 
 # Installation
 
- 
 $ npm install prodio-notification-service-sdk --save
 
   
@@ -82,10 +90,9 @@ This application will run as a separate micro-service independent of your produc
 
 ### Method
 
-### createUser:
- method will create the User in database for the BASE_URL provided 
-The createUser method lets you register user in Database with provided base_url.
-Providing a user_id and an payload of meta_info i.e basic details of the user.
+`createUser:`
+ method will Register the User in database for the BASE_URL initialized with and with provided user_id and payload of meta_info i.e basic details of the user will register the user in Database.
+
 
 ### Payload
 
