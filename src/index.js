@@ -15,94 +15,93 @@ const {
 
 function notificationModule(payload, baseUrl) {
   this.createUser = function (payload, baseUrl) {
-    if(baseUrl !== undefined && baseUrl !== null && baseUrl !== ""){
+    if (baseUrl !== undefined && baseUrl !== null && baseUrl !== "") {
       createNotificationConsumer(payload, baseUrl);
     }
     else {
       let errorMessage = `Please add BaseUrl.`;
-      return  errorMessage;
+      return errorMessage;
     }
-   
+
   };
 }
 
 //creating user in  notification consumer model.
 const createNotificationConsumer = function (payload, baseUrl) {
 
+  let url = `${baseUrl}notification-consumers`;
+  axios.post(url, payload).then(response => {
+    console.log("user_created", response);
+    if (response.status === 200) {
+      let email = response.data.meta_info.email;
+      let userName = response.data.meta_info.name;
+      const templateBody = {
+        "title": `${userName}_Template`,
+        "body": `Welcome ${userName}`
+      };
+      const eventPayload = {
+        "name": "CREATE_USER",
+        "created_at": new Date(),
+        "updated_at": new Date(),
+        "_templates": [
+          {
+            "name": EMAIL_NOTIFICATION_TEMPLATE,
+            "type": EMAIL_NOTIFICATION_TEMPLATE,
+            "body": JSON.stringify(templateBody),
+            "created_at": new Date(),
+            "updated_at": new Date()
+          }
+        ]
+      };
+      createEvent(eventPayload, email, baseUrl, userName);
+      console.log("111111");
+    }
+    else {
+      console.log("222222");
 
-    let url = `${baseUrl}notification-consumers`;
-    axios.post(url, payload).then(response => {
-      console.log("user_created", response);
-      if (response.status === 200) {
-        let email = response.data.meta_info.email;
-        let userName = response.data.meta_info.name;
-        const templateBody = {
-          "title": `${userName}_Template`,
-          "body": `Welcome ${userName}`
-        };
-        const eventPayload = {
-          "name":"CREATE_USER",
-          "created_at": new Date(),
-          "updated_at": new Date(),
-          "_templates": [
-            {
-              "name": EMAIL_NOTIFICATION_TEMPLATE,
-              "type": EMAIL_NOTIFICATION_TEMPLATE,
-              "body": JSON.stringify(templateBody),
-              "created_at": new Date(),
-              "updated_at": new Date()
-            }
-          ]
-        };
-        createEvent(eventPayload,email,baseUrl);
-        console.log("111111");
-      }
-      else {
-        console.log("222222");
-  
-      }
-    }).catch((error) => {
-      console.log("333333",error);
-  
-    });
-  }
- 
+    }
+  }).catch((error) => {
+    console.log("333333", error);
+
+  });
+}
 
 // creating event in notification consumer model.
-const createEvent = function (payload,email,baseUrl) {
+const createEvent = function (payload, email, baseUrl, userName) {
   let url = `${baseUrl}notification-consumers/createevent`;
   axios.post(url, payload).then(response => {
     if (response.status === 200) {
       console.log("event Response", response);
       let eventId = response.data.id;
       const sendMailBody = {
-        "email":email
+        "email": email,
+        "name": userName
       }
-      sendMail(sendMailBody, eventId,baseUrl);
+      sendMail(sendMailBody, eventId, baseUrl);
 
     }
     else {
-      console.log("event",response);
+      console.log("event", response);
     }
 
-  }).catch(error=>{
-    console.log("eventError",error);
+  }).catch(error => {
+    console.log("eventError", error);
   });
 }
 
 //sending mails to user created in notification consumer model.
-const sendMail = function (sendMailBody,event_id,baseUrl) {
+const sendMail = function (sendMailBody, event_id, baseUrl) {
 
   let url = `${baseUrl}notification-consumers/${event_id}`;
   axios.post(url, sendMailBody).then(response => {
     if (response.status === 200) {
-        console.log("response",response);
-        console.log("mail sent successfully");
+      console.log("response", response);
+      console.log("mail sent successfully");
     }
     else {
     }
-  }).catch(error=>{
-    console.log("mail error",error);
+  }).catch(error => {
+    console.log("mail error", error);
   })
 
 }
