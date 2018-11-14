@@ -90,8 +90,8 @@ This application will run as a separate micro-service independent of your produc
 
 ### Method
 
-`create subscriber:`
- method will Register the Subscriber of the service.
+`1. Create Subscriber:`
+ This will Register the Subscriber as a part of the service.
 
 
 ### Payload
@@ -99,19 +99,21 @@ This application will run as a separate micro-service independent of your produc
 | Key | Type | Value | Description | Required |
 | --- | ---- | ----- | ----------- | -------- |
 | `action` | string | `CREATESUBSCRIBER` | key which defines the type of action to be performed | YES |
-| `meta` | json | ``` { "name": "subscriber name", "email": "subscriber email", "id": "subscriber unique id" }`` | Json having subscriber details. | YES |
+| `meta` | json | { "name": "subscriber name(mandatory)", "email": "subscriber email(mandatory)", "phone":"(mandatory for SMS)", "id": "subscriber unique id(mandatory)", "webToken":"(mandatory for web notifications using FCM)", "androidToken": "(mandatory for push notifications using FCM)", "iosToken":"(mandatory for push notifications using FCM)" } | Json having subscriber details. | YES |
 
 
 #### Example
 
 ```JSX
 
-	const notifications = require('notifications-module-prodio');
-	const notificationModule = new notifications();
 	const metaInfo = {
 		"name": "",
 		"email": "",
-		"id": ""
+		"phone": "",
+		"id": "",
+		"webToken": "",
+		"androidToken": "",
+		"iosToken": ""
 	};
 	const  payload = {
 		"action": "CREATESUBSCRIBER",
@@ -122,6 +124,60 @@ This application will run as a separate micro-service independent of your produc
 
 ```
 
+`2. Create Event:`
+ This will create and event for which the notification has to be sent.
 
 
+### Payload
+
+| Key | Type | Value | Description | Required |
+| --- | ---- | ----- | ----------- | -------- |
+| `action` | string | `CREATEEVENT` | key which defines the type of action to be performed | YES |
+| `meta` | json | { "name": "event name(mandatory)", "messages": "array of objects for the type of messages to be sent via various channels(optional)", "channels": ["SMS","EMAIL"] } | Json having event details. | YES |
+
+
+##### List of Channels
+		1. SMS
+		2. Email
+		3. WEB
+		4. MOBILE
+
+##### Message object keys
+		1. name - string - mandatory
+		2. type - string - any one from the list of channel
+		3. title - string - notification title or email subject, blank incase of sms
+		4. body - URI encoded string - main content, dynamic datapoints to be replaced should be written as {{SUBSCRIBERNAME}} i.e. {{SUBSCRIBERNAME}} will be replaced by actual name while sending notification.
+
+
+#### Example
+
+```JSX
+
+	const metaInfo = {
+		"name": "WELCOME",
+		"messages": [
+			{
+				"name":"WELCOME EMAIL MESSAHE",
+				"type":"EMAIL",
+				"title":"Thank you for joining!!!!!",
+				"body": encodeURI("Welcome {{SUBSCRIBERNAME}}")
+			},
+			{
+				"name":"WELCOME SMS MESSAHE",
+				"type":"SMS",
+				"title":"",
+				"body": encodeURI("Welcome {{SUBSCRIBERNAME}}")
+			}
+		],
+		"channels": ["EMAIL", "SMS"],
+
+	};
+	const  payload = {
+		"action": "CREATEEVENT",
+		"meta": metaInfo
+	};
+	//create subscriber in notification module
+	let createSubscriber = notificationModule.execute(payload);
+
+```
 
