@@ -5,7 +5,7 @@
 
   
 
-# prodio-notification-service-sdk
+# notifications-module-prodio
 
   
 
@@ -21,7 +21,7 @@
 
   
 
-`prodio-notification-service-sdk` is an  node js client for the  `prodio-notification-service API`. Integrate in to any application to send emails, sms, and push app notifications to both mobile phones and web browsers.
+`notifications-module-prodio` is an  node js client for the  `notification-service-prodio API`. Integrate in to any application to send emails, sms, and push app notifications to both mobile phones and web browsers.
 
   
 
@@ -45,7 +45,7 @@ This project is started with an aim to reduce implementing and re-architecting c
 
 # Features!
   
-* Register users and store all user tokens
+* Register subscribers and store all tokens
 * Send emails ( sendInBlue )
 * Template types ( email, sms and app notification )
 * Link templates with events
@@ -60,19 +60,19 @@ This project is started with an aim to reduce implementing and re-architecting c
  * If you've pm2 installed then use this pm2 start server/server.js --name="NOTIFICATION_SERVICE"
 
 # Note:
-`prodio-notification-service` uses loopback as the core framework for developing API's, so all customisations, configurations, middlewares, events, and db connectors can be used which you would have used in loopback.
+`notification-service-prodio` uses loopback as the core framework for developing API's, so all customisations, configurations, middlewares, events, and db connectors can be used which you would have used in loopback.
 
 # Installation
 
-$ npm install prodio-notification-service-sdk --save
+$ npm install notifications-module-prodio --save
 
   
 # Initialization 
-Require the prodio-notification-service-sdk module and initialize the notificationSdk client, passing your base_url  as the first argument.
+Require the notifications-module-prodio module and initialize the notificationSdk client.
 ```JSX
 
- var  notificationSdk = require('notification-service-sdk-prodio');
- var notificationModule = new notificationSdk('YOUR_BASE_URL');
+ const notifications = require('notifications-module-prodio');
+ const notificationModule = new notifications();
  ``` 
 
 # Usage
@@ -90,43 +90,35 @@ This application will run as a separate micro-service independent of your produc
 
 ### Method
 
-`createUser:`
- method will Register the User in database for the BASE_URL initialized with and with provided user_id and payload of meta_info i.e basic details of the user will register the user in Database.
+`create subscriber:`
+ method will Register the Subscriber of the service.
 
 
 ### Payload
 
-| Prop | Type | Description|
-:--------------------:|:----------------------------------------------------------------------------:|:-----------|
-| `user_id` | string |unique Identity Id of the user created| |
-| `email_address` | string | Email address of the user created. |
-| `user_name` | string| Name of the user created |
-| `Event_Name` | string | Event name for creating events for triggering notifications related to events.|
+| Key | Type | Value | Description | Required |
+| --- | ---- | ----- | ----------- | -------- |
+| `action` | string | `CREATESUBSCRIBER` | key which defines the type of action to be performed | YES |
+| `meta` | json | ``` { "name": "subscriber name", "email": "subscriber email", "id": "subscriber unique id" }`` | Json having subscriber details. | YES |
+
 
 #### Example
 
-  
-
-  
-
 ```JSX
 
-	var  notificationSdk = require('notification-service-sdk-prodio');
-	var notificationModule = new notificationSdk('YOUR_BASE_URL');
-		//create user in notification module
-		const meta_info = {
-		     "user_name":"NAME",
-		      "email":"EMAIL_ADDRESS",
-		    }
-		const  payload = {
-		"user_id":"USER_ID",
-		"meta_info":meta_info,
-		"EVENT_NAME":"CREATE_USER"
-		};
-
-		let  createUser = notificationModule.createUser(payload);
-
-  
+	const notifications = require('notifications-module-prodio');
+	const notificationModule = new notifications();
+	const metaInfo = {
+		"name": "",
+		"email": "",
+		"id": ""
+	};
+	const  payload = {
+		"action": "CREATESUBSCRIBER",
+		"meta": metaInfo
+	};
+	//create subscriber in notification module
+	let createSubscriber = notificationModule.execute(payload);
 
 ```
 
