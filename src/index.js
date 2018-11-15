@@ -29,6 +29,16 @@ function notificationModule(payload) {
       };
       createEvent(eventPayload,BASE_URL);
     }
+    else if(payload.action == "SENDEMAIL"){
+
+      //send mail payload
+      let eventId = payload.eventId;
+      const sendMailBody = {
+        "email":payload.metaInfo.email,
+        "name":payload.metaInfo.name
+      }
+      sendMail(sendMailBody, eventId,baseUrl);
+    }
     else {
       let errorMessage = `Please add BaseUrl.`;
       return errorMessage;
@@ -36,6 +46,7 @@ function notificationModule(payload) {
 
   };
 }
+
 
 //creating user in  notification consumer model.
 const createNotificationConsumer = function (payload, baseUrl) {
