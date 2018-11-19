@@ -99,7 +99,7 @@ This application will run as a separate micro-service independent of your produc
 | Key | Type | Value | Description | Required |
 | --- | ---- | ----- | ----------- | -------- |
 | `action` | string | `CREATESUBSCRIBER` | key which defines the type of action to be performed | YES |
-| `meta` | json | { "name": "subscriber name(mandatory)", "email": "subscriber email(mandatory)", "phone":"(mandatory for SMS)", "id": "subscriber unique id(mandatory)", "webToken":"(mandatory for web notifications using FCM)", "androidToken": "(mandatory for push notifications using FCM)", "iosToken":"(mandatory for push notifications using FCM)" } | Json having subscriber details. | YES |
+| `meta` | json | { "subscriberId": "", "email": "", "phone":"", "webToken":"", "androidToken": "", "iosToken":"", metaData: {} } | Json having subscriber details. | YES |
 
 
 #### Example
@@ -107,13 +107,13 @@ This application will run as a separate micro-service independent of your produc
 ```JSX
 
 	const metaInfo = {
-		"name": "",
-		"email": "",
-		"phone": "",
-		"id": "",
-		"webToken": "",
-		"androidToken": "",
-		"iosToken": ""
+		"subscriberId": "", //subscriber unique id(mandatory)
+		"email": "", //subscriber email(mandatory)
+		"phone": "", //(mandatory for SMS)
+		"webToken": "", //(mandatory for web notifications using FCM)
+		"androidToken": "", //(mandatory for push notifications using FCM)
+		"iosToken": "", //(mandatory for push notifications using FCM)
+		"metaData": {} //JSON object - can be any user related information
 	};
 	const  payload = {
 		"action": "CREATESUBSCRIBER",
@@ -160,13 +160,13 @@ This application will run as a separate micro-service independent of your produc
 				"name":"WELCOME EMAIL MESSAHE",
 				"type":"EMAIL",
 				"title":"Thank you for joining!!!!!",
-				"body": encodeURI("Welcome {{SUBSCRIBERNAME}}")
+				"body": encodeURIComponent("Welcome {{SUBSCRIBERNAME}}")
 			},
 			{
 				"name":"WELCOME SMS MESSAHE",
 				"type":"SMS",
 				"title":"",
-				"body": encodeURI("Welcome {{SUBSCRIBERNAME}}")
+				"body": encodeURIComponent("Welcome {{SUBSCRIBERNAME}}")
 			}
 		],
 		"channels": ["EMAIL", "SMS"],
