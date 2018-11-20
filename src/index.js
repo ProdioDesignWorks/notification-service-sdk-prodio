@@ -3,16 +3,11 @@
 const axios = require('axios');
 const HttpErrors = require('http-errors');
 
-const BASE_URL = `https://1kfkd7w1qi.execute-api.us-west-2.amazonaws.com/dev`;
-const {
-  APP_NOTIFICATION_TEMPLATE,
-  EMAIL_NOTIFICATION_TEMPLATE,
-  SMS_NOTIFICATION_TEMPLATE,
-  TEMPLATE_TYPES,
-  ANDROID_TYPE_TOKEN,
-  IOS_TYPE_TOKEN,
-  WEB_TYPE_TOKEN,
-  TOKEN_TYPES,
+const { APP_NOTIFICATION_TEMPLATE, EMAIL_NOTIFICATION_TEMPLATE, SMS_NOTIFICATION_TEMPLATE, TEMPLATE_TYPES,
+  ANDROID_TOKEN, IOS_TOKEN, WEB_TOKEN, EMAIL_TOKEN, SMS_TOKEN, TOKEN_TYPES,
+  CREATESUBSCRIBER, READSUBSCRIBER, DELETESUBSCRIBER, UPDATESUBSCRIBER,
+  CREATEEVENT,
+  BASE_URL
 } = require('./config/constant.js');
 
 let responseBody = {
@@ -50,24 +45,27 @@ const isJson = function (str) {
   return false;
 }
 
-function notificationModule(payload) {
+function notificationModule() {
   this.execute = function (payload, callback) {
     // action key calls api.
-    if (payload.action == "CREATESUBSCRIBER") {
-        return createNotificationConsumer(payload, callback);
-    }
-    else if (payload.action == "CREATEEVENT") {
+    if (payload.action === CREATESUBSCRIBER) {
+      return createNotificationConsumer(payload, callback);
+    } else if (payload.action === READSUBSCRIBER) {
+      return getNotificationConsumer(callback);
+    } else if (payload.action === DELETESUBSCRIBER) {
+      return deleteNotificationConsumer(payload, callback);
+    } else if (payload.action === UPDATESUBSCRIBER) {
+      return updateNotificationConsumer(payload, callback);
+    } else if (payload.action === CREATEEVENT) {
       const eventPayload = {
         "name": payload.metaInfo.name,
         "created_at": new Date(),
         "updated_at": new Date(),
-        "_templates": payload.messages,
+        "templates": payload.messages,
         "channels": payload.channels
       };
       createEvent(eventPayload, BASE_URL);
-    }
-    else if (payload.action == "SENDEMAIL") {
-
+    } else if (payload.action == "SENDEMAIL") {
       //send mail payload
       let eventId = payload.eventId;
       const sendMailBody = {
@@ -75,10 +73,8 @@ function notificationModule(payload) {
         "name": payload.metaInfo.name
       }
       sendMail(sendMailBody, eventId, baseUrl);
-    }
-    else {
-      let errorMessage = `Please add BaseUrl.`;
-      return errorMessage;
+    } else {
+      return callback(new HttpErrors.BadRequest('Invalid Action.', { expose: false }));
     }
 
   };
@@ -100,47 +96,136 @@ const createNotificationConsumer = function (payload, callback) {
       let subscriberTokens = [];
       if (!isNull(payload.email)) {
         const emailToken = {
-          "type": "EMAIL_TYPE_TOKEN",
+          "type": EMAIL_TOKEN,
           "token": payload.email
         };
         subscriberTokens.push(emailToken);
       }
       if (!isNull(payload.phone)) {
         const smsToken = {
-          "type": "SMS_TYPE_TOKEN",
+          "type": SMS_TOKEN,
           "token": payload.phone
         };
         subscriberTokens.push(smsToken);
       }
       if (!isNull(payload.webToken)) {
         const webToken = {
-          "type": "WEB_TYPE_TOKEN",
+          "type": WEB_TOKEN,
           "token": payload.webToken
         };
         subscriberTokens.push(webToken);
       }
       if (!isNull(payload.androidToken)) {
         const androidToken = {
-          "type": "ANDROID_TYPE_TOKEN",
+          "type": ANDROID_TOKEN,
           "token": payload.androidToken
         };
         subscriberTokens.push(androidToken);
       }
       if (!isNull(payload.iosToken)) {
         const iosToken = {
-          "type": "IOS_TYPE_TOKEN",
+          "type": IOS_TOKEN,
           "token": payload.iosToken
         };
         subscriberTokens.push(iosToken);
       }
-      let url = `${BASE_URL}/notification-consumers`;
+      const url = `${BASE_URL}/notification-subscribers/subscriber`;
       const requestPayload = {
         "subscriberId": payload.subscriberId,
         "metaInfo": payload.metaData,
         "subscriberTokens": subscriberTokens
       };
       axios.post(url, requestPayload).then(response => {
-        //console.log("user_created", response);
+        return callback(response);
+      }).catch((error) => {
+        return callback(new HttpErrors.InternalServerError('Please try again.', { expose: false }));
+      });
+    }
+  }
+}
+
+const getNotificationConsumer = function (callback) {
+  const url = `${BASE_URL}/notification-subscribers/subscriber`;
+  axios.get(url).then(response => {
+    return callback(response);
+  }).catch((error) => {
+    return callback(new HttpErrors.InternalServerError('Please try again.', { expose: false }));
+  });
+}
+
+const deleteNotificationConsumer = function (payload, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    payload = payload.meta;
+    if (isNull(payload.subscriberId)) {
+      return callback(new HttpErrors.BadRequest('Subscriber Id is mandatory.', { expose: false }));
+    } else {
+      const url = `${BASE_URL}/notification-subscribers/subscriber?subscriberId=${payload.subscriberId}`;
+      axios.delete(url).then(response => {
+        return callback(response);
+      }).catch((error) => {
+        return callback(error);
+      });
+    }
+  }
+}
+
+const updateNotificationConsumer = function (payload, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    payload = payload.meta;
+    if (isNull(payload.subscriberId)) {
+      return callback(new HttpErrors.BadRequest('Subscriber Id is mandatory.', { expose: false }));
+    } else if (!isNull(payload.email) && !isValidEmail(payload.email)) {
+      return callback(new HttpErrors.BadRequest('Invalid Email Address.', { expose: false }));
+    } else if (!isNull(payload.phone) && !isValidPhoneNumber(payload.phone)) {
+      return callback(new HttpErrors.BadRequest('Invalid Phone Number.', { expose: false }));
+    } else {
+      let subscriberTokens = [];
+      if (!isNull(payload.email)) {
+        const emailToken = {
+          "type": EMAIL_TOKEN,
+          "token": payload.email
+        };
+        subscriberTokens.push(emailToken);
+      }
+      if (!isNull(payload.phone)) {
+        const smsToken = {
+          "type": SMS_TOKEN,
+          "token": payload.phone
+        };
+        subscriberTokens.push(smsToken);
+      }
+      if (!isNull(payload.webToken)) {
+        const webToken = {
+          "type": WEB_TOKEN,
+          "token": payload.webToken
+        };
+        subscriberTokens.push(webToken);
+      }
+      if (!isNull(payload.androidToken)) {
+        const androidToken = {
+          "type": ANDROID_TOKEN,
+          "token": payload.androidToken
+        };
+        subscriberTokens.push(androidToken);
+      }
+      if (!isNull(payload.iosToken)) {
+        const iosToken = {
+          "type": IOS_TOKEN,
+          "token": payload.iosToken
+        };
+        subscriberTokens.push(iosToken);
+      }
+      const url = `${BASE_URL}/notification-subscribers/subscriber`;
+      const requestPayload = {
+        "subscriberId": payload.subscriberId,
+        "metaInfo": payload.metaData,
+        "subscriberTokens": subscriberTokens
+      };
+      axios.put(url, requestPayload).then(response => {
         return callback(response);
       }).catch((error) => {
         return callback(new HttpErrors.InternalServerError('Please try again.', { expose: false }));
