@@ -4,15 +4,13 @@ const axios = require('axios');
 const HttpErrors = require('http-errors');
 
 const { APP_NOTIFICATION_TEMPLATE, EMAIL_NOTIFICATION_TEMPLATE, SMS_NOTIFICATION_TEMPLATE, TEMPLATE_TYPES,
-  ANDROID_TOKEN, IOS_TOKEN, WEB_TOKEN, EMAIL_TOKEN, SMS_TOKEN, TOKEN_TYPES,
+  ANDROID_TOKEN, IOS_TOKEN, WEB_TOKEN, EMAIL_TOKEN, SMS_TOKEN,
+  TOKEN_TYPES, CHANNEL_TYPES,
   CREATESUBSCRIBER, READSUBSCRIBER, DELETESUBSCRIBER, UPDATESUBSCRIBER,
-  CREATEEVENT,
-  BASE_URL
+  CREATEEVENT, READEVENT, DELETEEVENT, UPDATEEVENT,
+  CREATEMESSAGE, READMESSAGE, DELETEMESSAGE, UPDATEMESSAGE, UPDATEMESSAGETEMPLATE,
+  BASE_URL, CHANNELEMAIL
 } = require('./config/constant.js');
-
-let responseBody = {
-
-};
 
 const isNull = function (val) {
   if (typeof val === 'string') { val = val.trim(); }
@@ -57,14 +55,23 @@ function notificationModule() {
     } else if (payload.action === UPDATESUBSCRIBER) {
       return updateNotificationConsumer(payload, callback);
     } else if (payload.action === CREATEEVENT) {
-      const eventPayload = {
-        "name": payload.metaInfo.name,
-        "created_at": new Date(),
-        "updated_at": new Date(),
-        "templates": payload.messages,
-        "channels": payload.channels
-      };
-      createEvent(eventPayload, BASE_URL);
+      return createEvent(payload, callback);
+    } else if (payload.action === READEVENT) {
+      return getEvent(callback);
+    } else if (payload.action === DELETEEVENT) {
+      return deleteEvent(payload, callback);
+    } else if (payload.action === UPDATEEVENT) {
+      return updateEvent(payload, callback);
+    } else if (payload.action === CREATEMESSAGE) {
+      return createMessage(payload, callback);
+    } else if (payload.action === READMESSAGE) {
+      return getMessages(callback);
+    } else if (payload.action === DELETEMESSAGE) {
+      return deleteMessage(payload, callback);
+    } else if (payload.action === UPDATEMESSAGE) {
+      return updateMessage(payload, callback);
+    } else if (payload.action === UPDATEMESSAGETEMPLATE) {
+      return updateMessageTemplate(payload, callback);
     } else if (payload.action == "SENDEMAIL") {
       //send mail payload
       let eventId = payload.eventId;
@@ -138,7 +145,7 @@ const createNotificationConsumer = function (payload, callback) {
       axios.post(url, requestPayload).then(response => {
         return callback(response);
       }).catch((error) => {
-        return callback(new HttpErrors.InternalServerError('Please try again.', { expose: false }));
+        return callback(error);
       });
     }
   }
@@ -149,7 +156,7 @@ const getNotificationConsumer = function (callback) {
   axios.get(url).then(response => {
     return callback(response);
   }).catch((error) => {
-    return callback(new HttpErrors.InternalServerError('Please try again.', { expose: false }));
+    return callback(error);
   });
 }
 
@@ -228,43 +235,252 @@ const updateNotificationConsumer = function (payload, callback) {
       axios.put(url, requestPayload).then(response => {
         return callback(response);
       }).catch((error) => {
-        return callback(new HttpErrors.InternalServerError('Please try again.', { expose: false }));
+        return callback(error);
       });
     }
   }
 }
 
 // creating event in notification consumer model.
-const createEvent = function (payload, baseUrl) {
-  let url = `${baseUrl}/notification-consumers/createevent`;
-  axios.post(url, payload).then(response => {
-    if (response.status === 200) {
-      console.log("event Response", response);
+const createEvent = function (payload, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    payload = payload.meta;
+    if (isNull(payload.name)) {
+      return callback(new HttpErrors.BadRequest('Event name is mandatory.', { expose: false }));
+    } else if (isNull(payload.channels) || payload.channels.length === 0) {
+      return callback(new HttpErrors.BadRequest('Event channels is mandatory.', { expose: false }));
+    } else {
+      let invalidChannels = [], eventChannels = payload.channels;
+      eventChannels.map(channel => {
+        if (typeof channel === "string") {
+          const isValidChannel = CHANNEL_TYPES.indexOf(channel.toUpperCase()) > -1;
+          if (!isValidChannel) {
+            invalidChannels.push(channel);
+          }
+        } else {
+          invalidChannels.push(channel);
+        }
+      });
+      if (invalidChannels.length > 0) {
+        return callback(new HttpErrors.BadRequest('Invalid Channel.', { expose: false }))
+      } else {
+        const url = `${BASE_URL}/events/event`;
+        axios.post(url, payload).then(response => {
+          return callback(response);
+        }).catch((error) => {
+          return callback(error);
+        });
+      }
     }
-    else {
-      console.log("event", response);
-    }
+  }
+}
 
-  }).catch(error => {
-    console.log("eventError", error);
+const getEvent = function (callback) {
+  const url = `${BASE_URL}/events/event`;
+  axios.get(url).then(response => {
+    return callback(response);
+  }).catch((error) => {
+    return callback(error);
   });
 }
 
-//sending mails to user created in notification consumer model.
-const sendMail = function (sendMailBody, event_id, baseUrl) {
-
-  let url = `${baseUrl}/notification-consumers/${event_id}`;
-  axios.post(url, sendMailBody).then(response => {
-    if (response.status === 200) {
-      console.log("response", response);
-      console.log("mail sent successfully");
+const deleteEvent = function (payload, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    payload = payload.meta;
+    if (isNull(payload.name)) {
+      return callback(new HttpErrors.BadRequest('Event name is mandatory.', { expose: false }));
+    } else {
+      const url = `${BASE_URL}/events/event?eventName=${payload.name}`;
+      axios.delete(url).then(response => {
+        return callback(response);
+      }).catch((error) => {
+        return callback(error);
+      });
     }
-    else {
-    }
-  }).catch(error => {
-    console.log("mail error", error);
-  })
-
+  }
 }
 
-module.exports = notificationModule;
+const updateEvent = function (payload, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    payload = payload.meta;
+    if (isNull(payload.name)) {
+      return callback(new HttpErrors.BadRequest('Event name is mandatory.', { expose: false }));
+    } else if (isNull(payload.channels) || payload.channels.length === 0) {
+      return callback(new HttpErrors.BadRequest('Event channels is mandatory.', { expose: false }));
+    } else {
+      let invalidChannels = [], eventChannels = payload.channels;
+      eventChannels.map(channel => {
+        if (typeof channel === "string") {
+          const isValidChannel = CHANNEL_TYPES.indexOf(channel.toUpperCase()) > -1;
+          if (!isValidChannel) {
+            invalidChannels.push(channel);
+          }
+        } else {
+          invalidChannels.push(channel);
+        }
+      });
+      if (invalidChannels.length > 0) {
+        return callback(new HttpErrors.BadRequest('Invalid Channel.', { expose: false }))
+      } else {
+        const url = `${BASE_URL}/events/event`;
+        axios.put(url, payload).then(response => {
+          return callback(response);
+        }).catch((error) => {
+          return callback(error);
+        });
+      }
+    }
+  }
+}
+
+const createMessage = function (payload, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    payload = payload.meta;
+    let invalidMessages = [];
+    if (isNull(payload.name)) {
+      return callback(new HttpErrors.BadRequest('Message name is mandatory.', { expose: false }));
+    } else if (isNull(payload.type)) {
+      return callback(new HttpErrors.BadRequest('Message type is mandatory.', { expose: false }));
+    } else if (isNull(payload.title)) {
+      return callback(new HttpErrors.BadRequest('Message title is mandatory.', { expose: false }));
+    } else if (isNull(payload.body)) {
+      return callback(new HttpErrors.BadRequest('Message Body is mandatory.', { expose: false }));
+    } else {
+      const isValidMessageType = CHANNEL_TYPES.indexOf(payload.type.toUpperCase()) > -1;
+      if (!isValidMessageType) {
+        invalidMessages.push(payload);
+      }
+      if (invalidMessages.length > 0) {
+        return cb(new HttpErrors.BadRequest('Invalid Message Object', { expose: false }))
+      } else {
+        const url = `${BASE_URL}/message/message`;
+        axios.post(url, payload).then(response => {
+          return callback(response);
+        }).catch((error) => {
+          return callback(error);
+        });
+      }
+    }
+  }
+}
+
+const getMessages = function (callback) {
+  const url = `${BASE_URL}/message/message`;
+  axios.get(url).then(response => {
+    return callback(response);
+  }).catch((error) => {
+    return callback(error);
+  });
+}
+
+const deleteMessage = function (payload, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    payload = payload.meta;
+    if (isNull(payload.name)) {
+      return callback(new HttpErrors.BadRequest('Message name is mandatory.', { expose: false }));
+    } else {
+      const url = `${BASE_URL}/message/message?messageName=${payload.name}`;
+      axios.delete(url).then(response => {
+        return callback(response);
+      }).catch((error) => {
+        return callback(error);
+      });
+    }
+  }
+}
+
+const updateMessage = function (payload, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    payload = payload.meta;
+    let invalidMessages = [];
+    if (isNull(payload.name)) {
+      return callback(new HttpErrors.BadRequest('Message name is mandatory.', { expose: false }));
+    } else if (isNull(payload.type)) {
+      return callback(new HttpErrors.BadRequest('Message type is mandatory.', { expose: false }));
+    } else if (isNull(payload.title)) {
+      return callback(new HttpErrors.BadRequest('Message title is mandatory.', { expose: false }));
+    } else if (isNull(payload.body)) {
+      return callback(new HttpErrors.BadRequest('Message Body is mandatory.', { expose: false }));
+    } else {
+      const isValidMessageType = CHANNEL_TYPES.indexOf(payload.type.toUpperCase()) > -1;
+      if (!isValidMessageType) {
+        invalidMessages.push(payload);
+      }
+      if (invalidMessages.length > 0) {
+        return cb(new HttpErrors.BadRequest('Invalid Message Object', { expose: false }))
+      } else {
+        const url = `${BASE_URL}/message/message`;
+        axios.put(url, payload).then(response => {
+          return callback(response);
+        }).catch((error) => {
+          return callback(error);
+        });
+      }
+    }
+  }
+}
+
+const updateMessageTemplate = function (payload, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    payload = payload.meta;
+    let invalidMessages = [];
+    if (isNull(payload.name)) {
+      return callback(new HttpErrors.BadRequest('Message name is mandatory.', { expose: false }));
+    } else if (isNull(payload.type)) {
+      return callback(new HttpErrors.BadRequest('Message type is mandatory.', { expose: false }));
+    } else if (payload.type !== CHANNELEMAIL) {
+      return callback(new HttpErrors.BadRequest('Message type for file can only be email.', { expose: false }));
+    } else if (isNull(payload.title)) {
+      return callback(new HttpErrors.BadRequest('Message title is mandatory.', { expose: false }));
+    } else if (isNull(payload.fileUrl)) {
+      return callback(new HttpErrors.BadRequest('Message Template Link is mandatory.', { expose: false }));
+    } else {
+      const isValidMessageType = CHANNEL_TYPES.indexOf(payload.type.toUpperCase()) > -1;
+      if (!isValidMessageType) {
+        invalidMessages.push(payload);
+      }
+      if (invalidMessages.length > 0) {
+        return cb(new HttpErrors.BadRequest('Invalid Message Object', { expose: false }))
+      } else {
+        const url = `${BASE_URL}/message/fileMessage`;
+        axios.post(url, payload).then(response => {
+          return callback(response);
+        }).catch((error) => {
+          return callback(error);
+        });
+      }
+    }
+  }
+}
+  //sending mails to user created in notification consumer model.
+  const sendMail = function (sendMailBody, event_id, baseUrl) {
+
+    let url = `${baseUrl}/notification-consumers/${event_id}`;
+    axios.post(url, sendMailBody).then(response => {
+      if (response.status === 200) {
+        console.log("response", response);
+        console.log("mail sent successfully");
+      }
+      else {
+      }
+    }).catch(error => {
+      console.log("mail error", error);
+    })
+
+  }
+
+  module.exports = notificationModule;
