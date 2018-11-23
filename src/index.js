@@ -2,6 +2,7 @@
 // eslint-disable-next-line import/prefer-default-export
 const axios = require('axios');
 const HttpErrors = require('http-errors');
+const CircularJSON = require('circular-json');
 
 const { APP_NOTIFICATION_TEMPLATE, EMAIL_NOTIFICATION_TEMPLATE, SMS_NOTIFICATION_TEMPLATE, TEMPLATE_TYPES,
   ANDROID_TOKEN, IOS_TOKEN, WEB_TOKEN, EMAIL_TOKEN, SMS_TOKEN,
@@ -9,7 +10,7 @@ const { APP_NOTIFICATION_TEMPLATE, EMAIL_NOTIFICATION_TEMPLATE, SMS_NOTIFICATION
   CREATESUBSCRIBER, READSUBSCRIBER, DELETESUBSCRIBER, UPDATESUBSCRIBER,
   CREATEEVENT, READEVENT, DELETEEVENT, UPDATEEVENT,
   CREATEMESSAGE, READMESSAGE, DELETEMESSAGE, UPDATEMESSAGE, UPDATEMESSAGETEMPLATE,
-  BASE_URL, CHANNELEMAIL
+  CHANNELEMAIL, SENDEMAIL
 } = require('./config/constant.js');
 
 const isNull = function (val) {
@@ -43,43 +44,37 @@ const isJson = function (str) {
   return false;
 }
 
-function notificationModule() {
+function notificationModule(BASE_URL) {
   this.execute = function (payload, callback) {
     // action key calls api.
     if (payload.action === CREATESUBSCRIBER) {
-      return createNotificationConsumer(payload, callback);
+      return createNotificationConsumer(payload, BASE_URL, callback);
     } else if (payload.action === READSUBSCRIBER) {
-      return getNotificationConsumer(callback);
+      return getNotificationConsumer(BASE_URL, callback);
     } else if (payload.action === DELETESUBSCRIBER) {
-      return deleteNotificationConsumer(payload, callback);
+      return deleteNotificationConsumer(payload, BASE_URL, callback);
     } else if (payload.action === UPDATESUBSCRIBER) {
-      return updateNotificationConsumer(payload, callback);
+      return updateNotificationConsumer(payload, BASE_URL, callback);
     } else if (payload.action === CREATEEVENT) {
-      return createEvent(payload, callback);
+      return createEvent(payload, BASE_URL, callback);
     } else if (payload.action === READEVENT) {
-      return getEvent(callback);
+      return getEvent(BASE_URL, callback);
     } else if (payload.action === DELETEEVENT) {
-      return deleteEvent(payload, callback);
+      return deleteEvent(payload, BASE_URL, callback);
     } else if (payload.action === UPDATEEVENT) {
-      return updateEvent(payload, callback);
+      return updateEvent(payload, BASE_URL, callback);
     } else if (payload.action === CREATEMESSAGE) {
-      return createMessage(payload, callback);
+      return createMessage(payload, BASE_URL, callback);
     } else if (payload.action === READMESSAGE) {
-      return getMessages(callback);
+      return getMessages(BASE_URL, callback);
     } else if (payload.action === DELETEMESSAGE) {
-      return deleteMessage(payload, callback);
+      return deleteMessage(payload, BASE_URL, callback);
     } else if (payload.action === UPDATEMESSAGE) {
-      return updateMessage(payload, callback);
+      return updateMessage(payload, BASE_URL, callback);
     } else if (payload.action === UPDATEMESSAGETEMPLATE) {
-      return updateMessageTemplate(payload, callback);
-    } else if (payload.action == "SENDEMAIL") {
-      //send mail payload
-      let eventId = payload.eventId;
-      const sendMailBody = {
-        "email": payload.metaInfo.email,
-        "name": payload.metaInfo.name
-      }
-      sendMail(sendMailBody, eventId, baseUrl);
+      return updateMessageTemplate(payload, BASE_URL, callback);
+    } else if (payload.action == SENDEMAIL) {
+      return sendMail(payload, BASE_URL, callback);
     } else {
       return callback(new HttpErrors.BadRequest('Invalid Action.', { expose: false }));
     }
@@ -88,7 +83,7 @@ function notificationModule() {
 }
 
 //creating user in  notification consumer model.
-const createNotificationConsumer = function (payload, callback) {
+const createNotificationConsumer = function (payload, BASE_URL, callback) {
   if (!isJson(payload)) {
     return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
   } else {
@@ -145,22 +140,24 @@ const createNotificationConsumer = function (payload, callback) {
       axios.post(url, requestPayload).then(response => {
         return callback(response);
       }).catch((error) => {
-        return callback(error);
+        let json = CircularJSON.stringify(error);
+        return callback(json);
       });
     }
   }
 }
 
-const getNotificationConsumer = function (callback) {
+const getNotificationConsumer = function (BASE_URL, callback) {
   const url = `${BASE_URL}/notification-subscribers/subscriber`;
   axios.get(url).then(response => {
     return callback(response);
   }).catch((error) => {
-    return callback(error);
+    let json = CircularJSON.stringify(error);
+    return callback(json);
   });
 }
 
-const deleteNotificationConsumer = function (payload, callback) {
+const deleteNotificationConsumer = function (payload, BASE_URL, callback) {
   if (!isJson(payload)) {
     return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
   } else {
@@ -172,13 +169,14 @@ const deleteNotificationConsumer = function (payload, callback) {
       axios.delete(url).then(response => {
         return callback(response);
       }).catch((error) => {
-        return callback(error);
+        let json = CircularJSON.stringify(error);
+        return callback(json);
       });
     }
   }
 }
 
-const updateNotificationConsumer = function (payload, callback) {
+const updateNotificationConsumer = function (payload, BASE_URL, callback) {
   if (!isJson(payload)) {
     return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
   } else {
@@ -235,14 +233,15 @@ const updateNotificationConsumer = function (payload, callback) {
       axios.put(url, requestPayload).then(response => {
         return callback(response);
       }).catch((error) => {
-        return callback(error);
+        let json = CircularJSON.stringify(error);
+        return callback(json);
       });
     }
   }
 }
 
 // creating event in notification consumer model.
-const createEvent = function (payload, callback) {
+const createEvent = function (payload, BASE_URL, callback) {
   if (!isJson(payload)) {
     return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
   } else {
@@ -270,23 +269,25 @@ const createEvent = function (payload, callback) {
         axios.post(url, payload).then(response => {
           return callback(response);
         }).catch((error) => {
-          return callback(error);
+          let json = CircularJSON.stringify(error);
+          return callback(json);
         });
       }
     }
   }
 }
 
-const getEvent = function (callback) {
+const getEvent = function (BASE_URL, callback) {
   const url = `${BASE_URL}/events/event`;
   axios.get(url).then(response => {
     return callback(response);
   }).catch((error) => {
-    return callback(error);
+    let json = CircularJSON.stringify(error);
+    return callback(json);
   });
 }
 
-const deleteEvent = function (payload, callback) {
+const deleteEvent = function (payload, BASE_URL, callback) {
   if (!isJson(payload)) {
     return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
   } else {
@@ -298,13 +299,14 @@ const deleteEvent = function (payload, callback) {
       axios.delete(url).then(response => {
         return callback(response);
       }).catch((error) => {
-        return callback(error);
+        let json = CircularJSON.stringify(error);
+        return callback(json);
       });
     }
   }
 }
 
-const updateEvent = function (payload, callback) {
+const updateEvent = function (payload, BASE_URL, callback) {
   if (!isJson(payload)) {
     return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
   } else {
@@ -332,14 +334,15 @@ const updateEvent = function (payload, callback) {
         axios.put(url, payload).then(response => {
           return callback(response);
         }).catch((error) => {
-          return callback(error);
+          let json = CircularJSON.stringify(error);
+          return callback(json);
         });
       }
     }
   }
 }
 
-const createMessage = function (payload, callback) {
+const createMessage = function (payload, BASE_URL, callback) {
   if (!isJson(payload)) {
     return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
   } else {
@@ -365,23 +368,25 @@ const createMessage = function (payload, callback) {
         axios.post(url, payload).then(response => {
           return callback(response);
         }).catch((error) => {
-          return callback(error);
+          let json = CircularJSON.stringify(error);
+          return callback(json);
         });
       }
     }
   }
 }
 
-const getMessages = function (callback) {
+const getMessages = function (BASE_URL, callback) {
   const url = `${BASE_URL}/message/message`;
   axios.get(url).then(response => {
     return callback(response);
   }).catch((error) => {
-    return callback(error);
+    let json = CircularJSON.stringify(error);
+    return callback(json);
   });
 }
 
-const deleteMessage = function (payload, callback) {
+const deleteMessage = function (payload, BASE_URL, callback) {
   if (!isJson(payload)) {
     return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
   } else {
@@ -393,13 +398,14 @@ const deleteMessage = function (payload, callback) {
       axios.delete(url).then(response => {
         return callback(response);
       }).catch((error) => {
-        return callback(error);
+        let json = CircularJSON.stringify(error);
+        return callback(json);
       });
     }
   }
 }
 
-const updateMessage = function (payload, callback) {
+const updateMessage = function (payload, BASE_URL, callback) {
   if (!isJson(payload)) {
     return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
   } else {
@@ -425,14 +431,15 @@ const updateMessage = function (payload, callback) {
         axios.put(url, payload).then(response => {
           return callback(response);
         }).catch((error) => {
-          return callback(error);
+          let json = CircularJSON.stringify(error);
+          return callback(json);
         });
       }
     }
   }
 }
 
-const updateMessageTemplate = function (payload, callback) {
+const updateMessageTemplate = function (payload, BASE_URL, callback) {
   if (!isJson(payload)) {
     return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
   } else {
@@ -460,27 +467,37 @@ const updateMessageTemplate = function (payload, callback) {
         axios.post(url, payload).then(response => {
           return callback(response);
         }).catch((error) => {
-          return callback(error);
+          let json = CircularJSON.stringify(error);
+          return callback(json);
         });
       }
     }
   }
 }
-  //sending mails to user created in notification consumer model.
-  const sendMail = function (sendMailBody, event_id, baseUrl) {
-
-    let url = `${baseUrl}/notification-consumers/${event_id}`;
-    axios.post(url, sendMailBody).then(response => {
-      if (response.status === 200) {
-        console.log("response", response);
-        console.log("mail sent successfully");
+//sending mails to user created in notification consumer model.
+const sendMail = function (payload, BASE_URL, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    payload = payload.meta;
+    if (isNull(payload.eventName)) {
+      return callback(new HttpErrors.BadRequest('Event name is mandatory.', { expose: false }));
+    } else if (isNull(payload.subscriberId)) {
+      return callback(new HttpErrors.BadRequest('Subscriber Id is mandatory.', { expose: false }));
+    } else {
+      let payloadProps = {};
+      if (!isNull(payload.props)) {
+        payloadProps = payload.props
       }
-      else {
-      }
-    }).catch(error => {
-      console.log("mail error", error);
-    })
-
+      const url = `${BASE_URL}/notification-subscribers/email?eventName=${payload.eventName}&subscriberId=${payload.subscriberId}`;
+      axios.post(url, payloadProps).then(response => {
+        return callback(response);
+      }).catch((error) => {
+        let json = CircularJSON.stringify(error);
+        return callback(json);
+      });
+    }
   }
+}
 
-  module.exports = notificationModule;
+module.exports = notificationModule;
