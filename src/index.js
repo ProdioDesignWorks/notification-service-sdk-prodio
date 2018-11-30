@@ -10,7 +10,8 @@ const { APP_NOTIFICATION_TEMPLATE, EMAIL_NOTIFICATION_TEMPLATE, SMS_NOTIFICATION
   CREATESUBSCRIBER, READSUBSCRIBER, DELETESUBSCRIBER, UPDATESUBSCRIBER,
   CREATEEVENT, READEVENT, DELETEEVENT, UPDATEEVENT,
   CREATEMESSAGE, READMESSAGE, DELETEMESSAGE, UPDATEMESSAGE, UPDATEMESSAGETEMPLATE,
-  CHANNELEMAIL, SENDEMAIL
+  CHANNELEMAIL, SENDEMAIL, SENDPUSHNOTIFICATION,
+  CREATESUBSCRIBERGROUP, SUBSCRIBERBULKUPLOAD
 } = require('./config/constant.js');
 
 const isNull = function (val) {
@@ -73,8 +74,14 @@ function notificationModule(BASE_URL) {
       return updateMessage(payload, BASE_URL, callback);
     } else if (payload.action === UPDATEMESSAGETEMPLATE) {
       return updateMessageTemplate(payload, BASE_URL, callback);
-    } else if (payload.action == SENDEMAIL) {
+    } else if (payload.action === SENDEMAIL) {
       return sendMail(payload, BASE_URL, callback);
+    } else if (payload.action === SENDPUSHNOTIFICATION) {
+      return sendPushNotifications(payload, BASE_URL, callback);
+    } else if (payload.action === SUBSCRIBERBULKUPLOAD) {
+      return subscriberBulkUpload(payload, BASE_URL, callback);
+    } else if (payload.action === CREATESUBSCRIBERGROUP) {
+      return createSubscriberGroup(payload, BASE_URL, callback);
     } else {
       return callback(new HttpErrors.BadRequest('Invalid Action.', { expose: false }));
     }
@@ -491,6 +498,78 @@ const sendMail = function (payload, BASE_URL, callback) {
       }
       const url = `${BASE_URL}/notification-subscribers/email?eventName=${payload.eventName}&subscriberId=${payload.subscriberId}`;
       axios.post(url, payloadProps).then(response => {
+        return callback(response);
+      }).catch((error) => {
+        let json = CircularJSON.stringify(error);
+        return callback(json);
+      });
+    }
+  }
+}
+
+const sendPushNotifications = function (payload, BASE_URL, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    payload = payload.meta;
+    if (isNull(payload.eventName)) {
+      return callback(new HttpErrors.BadRequest('Event name is mandatory.', { expose: false }));
+    } else if (isNull(payload.subscriberId)) {
+      return callback(new HttpErrors.BadRequest('Subscriber Id is mandatory.', { expose: false }));
+    } else {
+      let payloadProps = {};
+      if (!isNull(payload.props)) {
+        payloadProps.props = payload.props
+      }
+      if (!isNull(payload.data)) {
+        payloadProps.notificationData = payload.data
+      }
+      const url = `${BASE_URL}/notification-subscribers/appNotification?eventName=${payload.eventName}&subscriberId=${payload.subscriberId}`;
+      axios.post(url, payloadProps).then(response => {
+        return callback(response);
+      }).catch((error) => {
+        let json = CircularJSON.stringify(error);
+        return callback(json);
+      });
+    }
+  }
+}
+
+const subscriberBulkUpload = function (payload, BASE_URL, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    payload = payload.meta;
+    if (isNull(payload.link)) {
+      return callback(new HttpErrors.BadRequest('Link is mandatory.', { expose: false }));
+    } else {
+      const url = `${BASE_URL}/notification-subscribers/bulkUpload?link=${payload.link}`;
+      axios.post(url, payloadProps).then(response => {
+        return callback(response);
+      }).catch((error) => {
+        let json = CircularJSON.stringify(error);
+        return callback(json);
+      });
+    }
+  }
+}
+
+const createSubscriberGroup = function (payload, BASE_URL, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    payload = payload.meta;
+    if (isNull(payload.name)) {
+      return callback(new HttpErrors.BadRequest('Group name is mandatory.', { expose: false }));
+    } else if (isNull(payload.subscribers) || payload.subscribers.length === 0) {
+      return callback(new HttpErrors.BadRequest('Add minimum one group subscriber.', { expose: false }));
+    } else {
+      const payloadData = {
+        name: payload.name,
+        subscribers: payload.subscribers
+      };
+      const url = `${BASE_URL}/subscriberGroups/group`;
+      axios.post(url, payloadData).then(response => {
         return callback(response);
       }).catch((error) => {
         let json = CircularJSON.stringify(error);

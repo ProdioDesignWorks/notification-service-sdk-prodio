@@ -1,6 +1,6 @@
 {
   "name": "notifications-module-prodio",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "NPM for consuming prodio notification service",
   "main": "lib/index.js",
   "scripts": {
@@ -29,7 +29,7 @@
     "notifications",
     "sms"
   ],
-  "author": "Pawan Wagh <pawan@prodio.in> (http://prodio.in/)",
+  "author": "Vatsal Shah <vatsal@prodio.in> (http://prodio.in/)",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/ProdioDesignWorks/notifications-module-prodio/issues"
