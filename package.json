@@ -1,7 +1,7 @@
 {
-  "name": "notification-service-sdk-prodio",
-  "version": "1.0.11",
-  "description": "Sdk for consuming prodio notification service",
+  "name": "notifications-module-prodio",
+  "version": "1.0.12",
+  "description": "NPM for consuming prodio notification service",
   "main": "lib/index.js",
   "scripts": {
     "build": ". scripts/build.sh",
@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ProdioDesignWorks/prodio-notification-sdk.git"
+    "url": "git+https://github.com/ProdioDesignWorks/notifications-module-prodio.git"
   },
   "keywords": [
     "notifications",
@@ -29,14 +29,15 @@
     "notifications",
     "sms"
   ],
-  "author": "Pawan Wagh <pawan@prodio.in> (http://prodio.in/)",
+  "author": "Vatsal Shah <vatsal@prodio.in> (http://prodio.in/)",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ProdioDesignWorks/prodio-notification-sdk/issues"
+    "url": "https://github.com/ProdioDesignWorks/notifications-module-prodio/issues"
   },
-  "homepage": "https://github.com/ProdioDesignWorks/prodio-notification-sdk#readme",
+  "homepage": "https://github.com/ProdioDesignWorks/notifications-module-prodio#readme",
   "dependencies": {
-    "axios": "^0.18.0"
+    "axios": "^0.18.0",
+    "http-errors": "^1.7.1"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
