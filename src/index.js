@@ -10,7 +10,7 @@ const { APP_NOTIFICATION_TEMPLATE, EMAIL_NOTIFICATION_TEMPLATE, SMS_NOTIFICATION
   CREATESUBSCRIBER, READSUBSCRIBER, DELETESUBSCRIBER, UPDATESUBSCRIBER,
   CREATEEVENT, READEVENT, DELETEEVENT, UPDATEEVENT,
   CREATEMESSAGE, READMESSAGE, DELETEMESSAGE, UPDATEMESSAGE, UPDATEMESSAGETEMPLATE,
-  CHANNELEMAIL, SENDEMAIL, SENDPUSHNOTIFICATION,
+  CHANNELEMAIL, SENDEMAIL, SENDPUSHNOTIFICATION, SENDWEBPUSHNOTIFICATION,
   CREATESUBSCRIBERGROUP, SUBSCRIBERBULKUPLOAD
 } = require('./config/constant.js');
 
@@ -78,6 +78,8 @@ function notificationModule(BASE_URL) {
       return sendMail(payload, BASE_URL, callback);
     } else if (payload.action === SENDPUSHNOTIFICATION) {
       return sendPushNotifications(payload, BASE_URL, callback);
+    } else if (payload.action === SENDWEBPUSHNOTIFICATION) {
+      return sendWebPushNotifications(payload, BASE_URL, callback);
     } else if (payload.action === SUBSCRIBERBULKUPLOAD) {
       return subscriberBulkUpload(payload, BASE_URL, callback);
     } else if (payload.action === CREATESUBSCRIBERGROUP) {
@@ -525,6 +527,34 @@ const sendPushNotifications = function (payload, BASE_URL, callback) {
         payloadProps.notificationData = payload.data
       }
       const url = `${BASE_URL}/notification-subscribers/appNotification?eventName=${payload.eventName}&subscriberId=${payload.subscriberId}`;
+      axios.post(url, payloadProps).then(response => {
+        return callback(response);
+      }).catch((error) => {
+        let json = CircularJSON.stringify(error);
+        return callback(json);
+      });
+    }
+  }
+}
+
+const sendWebPushNotifications = function (payload, BASE_URL, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    payload = payload.meta;
+    if (isNull(payload.eventName)) {
+      return callback(new HttpErrors.BadRequest('Event name is mandatory.', { expose: false }));
+    } else if (isNull(payload.subscriberId)) {
+      return callback(new HttpErrors.BadRequest('Subscriber Id is mandatory.', { expose: false }));
+    } else {
+      let payloadProps = {};
+      if (!isNull(payload.props)) {
+        payloadProps.props = payload.props
+      }
+      if (!isNull(payload.data)) {
+        payloadProps.notificationData = payload.data
+      }
+      const url = `${BASE_URL}/notification-subscribers/webNotification?eventName=${payload.eventName}&subscriberId=${payload.subscriberId}`;
       axios.post(url, payloadProps).then(response => {
         return callback(response);
       }).catch((error) => {
