@@ -2,7 +2,6 @@
 
 [![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://travis-ci.org/joemccann/dillinger)
 
-
 `notifications-module-prodio` is an  node js client for the  `notification-service-prodio API`. Integrate in to any application to send emails, sms, and push app notifications to both mobile phones and web browsers.
 
 # Philosophy
@@ -31,10 +30,10 @@ This project is started with an aim to reduce implementing and re-architecting c
 # Installation
 
 $ npm install notifications-module-prodio --save
-
   
 # Initialization 
 Require the notifications-module-prodio module and initialize the notificationSdk client.
+
 ```JSX
 
  const notifications = require('notifications-module-prodio');
