@@ -10,7 +10,7 @@ const { APP_NOTIFICATION_TEMPLATE, EMAIL_NOTIFICATION_TEMPLATE, SMS_NOTIFICATION
   CREATESUBSCRIBER, READSUBSCRIBER, DELETESUBSCRIBER, UPDATESUBSCRIBER,
   CREATEEVENT, READEVENT, DELETEEVENT, UPDATEEVENT,
   CREATEMESSAGE, READMESSAGE, DELETEMESSAGE, UPDATEMESSAGE, UPDATEMESSAGETEMPLATE,
-  CHANNELEMAIL, SENDEMAIL, SENDPUSHNOTIFICATION, SENDWEBPUSHNOTIFICATION,
+  CHANNELEMAIL, SENDEMAIL, SENDTRANSACTIONALEMAIL, SENDPUSHNOTIFICATION, SENDWEBPUSHNOTIFICATION,
   CREATESUBSCRIBERGROUP, SUBSCRIBERBULKUPLOAD
 } = require('./config/constant.js');
 
@@ -76,6 +76,8 @@ function notificationModule(BASE_URL) {
       return updateMessageTemplate(payload, BASE_URL, callback);
     } else if (payload.action === SENDEMAIL) {
       return sendMail(payload, BASE_URL, callback);
+    } else if (payload.action === SENDTRANSACTIONALEMAIL) {
+      return sendTransactionalMail(payload, BASE_URL, callback);
     } else if (payload.action === SENDPUSHNOTIFICATION) {
       return sendPushNotifications(payload, BASE_URL, callback);
     } else if (payload.action === SENDWEBPUSHNOTIFICATION) {
@@ -483,7 +485,7 @@ const updateMessageTemplate = function (payload, BASE_URL, callback) {
     }
   }
 }
-//sending mails to user created in notification consumer model.
+
 const sendMail = function (payload, BASE_URL, callback) {
   if (!isJson(payload)) {
     return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
@@ -499,6 +501,31 @@ const sendMail = function (payload, BASE_URL, callback) {
         payloadProps = payload.props
       }
       const url = `${BASE_URL}/notification-subscribers/email?eventName=${payload.eventName}&subscriberId=${payload.subscriberId}`;
+      axios.post(url, payloadProps).then(response => {
+        return callback(response);
+      }).catch((error) => {
+        let json = CircularJSON.stringify(error);
+        return callback(json);
+      });
+    }
+  }
+}
+
+const sendTransactionalMail = function (payload, BASE_URL, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    payload = payload.meta;
+    if (isNull(payload.eventName)) {
+      return callback(new HttpErrors.BadRequest('Event name is mandatory.', { expose: false }));
+    } else if (isNull(payload.subscriberId)) {
+      return callback(new HttpErrors.BadRequest('Subscriber Id is mandatory.', { expose: false }));
+    } else {
+      let payloadProps = {};
+      if (!isNull(payload.props)) {
+        payloadProps = payload.props
+      }
+      const url = `${BASE_URL}/notification-subscribers/transEmail?eventName=${payload.eventName}&subscriberId=${payload.subscriberId}`;
       axios.post(url, payloadProps).then(response => {
         return callback(response);
       }).catch((error) => {
