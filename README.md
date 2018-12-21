@@ -561,7 +561,77 @@ This will send web push notification to both android and ios to the subscribers.
 	let Subscribers = notificationModule.execute(payload);
 ```
 
-`18. Create Group of Subscribers:`
+`18. Send Transactional Email:`
+This will send email notification to the subscribers.
 
-`19. Send Email to group:`
+### Payload
+
+| Key | Type | Value | Description | Required |
+| --- | ---- | ----- | ----------- | -------- |
+| `action` | string | `SENDTRANSACTIONALEMAIL` | key which defines the type of action to be performed | YES |
+| `meta` | json | Refer the objet keys below | Json having event, message and subscriber details. | YES |
+
+
+#### Example
+
+```JSX
+	const metaInfo = {
+		"subscriberId": "",
+		"eventName": "CREATE_PAYER_MAIL",
+		"props": { // Dynmic data which will be replaced {{}}
+			"PAYERNAME": "",
+			"MERCHANTNAME": "",
+			"EMAIL": "",
+			"MOBILE": "",
+			"PASSWORD": "",
+		}
+	}
+	const sendEmailPayload = {
+		"action": "SENDTRANSACTIONALEMAIL",
+		"meta": metaInfo
+	};
+	let Message = notificationModule.execute(payload);
+```
+
+`19. Create Schedule Events:`
+This will send notifications to the subscribers based on the scheduled data.
+
+### Payload
+
+| Key | Type | Value | Description | Required |
+| --- | ---- | ----- | ----------- | -------- |
+| `action` | string | `ADDSCHEDULEDEVENT` | key which defines the type of action to be performed | YES |
+| `meta` | json | Refer the objet keys below | Json having message and subscriber details. | YES |
+
+
+#### Example
+
+##### List of Valid frequency if `isCustom` is true
+		1. WEEKLY - If set to weekly customDays fields must be array having integer values from 0,1,2,3,4,5,6. 0 stands for sunday.
+		2. MONTHLY - If set to weekly customDates fields must be array having integer values from 0,1,2,3,4.....31. each number is the date on which the notification will be sent
+
+##### List of Valid frequency if `isCustom` is false
+		1. ONCE - notification will be sent on the due date only
+		2. DAILY - notification will be sent daily till the due date
+		3. WEEKLY - notification will be sent on first day of week till the due date
+		3. MONTHLY - notification will be sent on first day of month till the due date
+
+```JSX
+
+	const metaInfo = {
+		"subscriberId": "", //existing subscriber Id
+		"messageName": "", //exisiting message
+		"dueDate": "", //final date till which the notification is to be sent
+		"isCustom": false, // boolean, can be true or false
+		"frequency": "", //refer above for values
+		"props": {}, // Dynmic data which will be replaced {{}}
+		"customDays": [],
+		"customDates": []
+	}
+	const sendEmailPayload = {
+		"action": "ADDSCHEDULEDEVENT",
+		"meta": metaInfo
+	};
+	let Message = notificationModule.execute(payload);
+```
 

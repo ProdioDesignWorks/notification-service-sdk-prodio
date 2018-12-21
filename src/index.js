@@ -8,7 +8,7 @@ const { APP_NOTIFICATION_TEMPLATE, EMAIL_NOTIFICATION_TEMPLATE, SMS_NOTIFICATION
   ANDROID_TOKEN, IOS_TOKEN, WEB_TOKEN, EMAIL_TOKEN, SMS_TOKEN,
   TOKEN_TYPES, CHANNEL_TYPES,
   CREATESUBSCRIBER, READSUBSCRIBER, DELETESUBSCRIBER, UPDATESUBSCRIBER,
-  CREATEEVENT, READEVENT, DELETEEVENT, UPDATEEVENT,
+  CREATEEVENT, READEVENT, DELETEEVENT, UPDATEEVENT, ADDSCHEDULEDEVENT,
   CREATEMESSAGE, READMESSAGE, DELETEMESSAGE, UPDATEMESSAGE, UPDATEMESSAGETEMPLATE,
   CHANNELEMAIL, SENDEMAIL, SENDTRANSACTIONALEMAIL, SENDPUSHNOTIFICATION, SENDWEBPUSHNOTIFICATION,
   CREATESUBSCRIBERGROUP, SUBSCRIBERBULKUPLOAD
@@ -86,6 +86,8 @@ function notificationModule(BASE_URL) {
       return subscriberBulkUpload(payload, BASE_URL, callback);
     } else if (payload.action === CREATESUBSCRIBERGROUP) {
       return createSubscriberGroup(payload, BASE_URL, callback);
+    } else if (payload.action === ADDSCHEDULEDEVENT) {
+      return createScheduledEvent(payload, BASE_URL, callback);
     } else {
       return callback(new HttpErrors.BadRequest('Invalid Action.', { expose: false }));
     }
@@ -626,6 +628,43 @@ const createSubscriberGroup = function (payload, BASE_URL, callback) {
         subscribers: payload.subscribers
       };
       const url = `${BASE_URL}/subscriberGroups/group`;
+      axios.post(url, payloadData).then(response => {
+        return callback(response);
+      }).catch((error) => {
+        let json = CircularJSON.stringify(error);
+        return callback(json);
+      });
+    }
+  }
+}
+
+const createScheduledEvent = function (payload, BASE_URL, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    payload = payload.meta;
+    if (isNull(payload.subscriberId)) {
+      return callback(new HttpErrors.BadRequest('Subscriber Id is mandatory.', { expose: false }));
+    } else if (isNull(payload.messageName)) {
+      return callback(new HttpErrors.BadRequest('Message name is mandatory.', { expose: false }));
+    } else if (isNull(payload.dueDate)) {
+      return callback(new HttpErrors.BadRequest('Due date is mandatory.', { expose: false }));
+    } else if (isNull(payload.isCustom)) {
+      return callback(new HttpErrors.BadRequest('Please set if event is custom or not.', { expose: false }));
+    } else if (isNull(payload.frequency)) {
+      return callback(new HttpErrors.BadRequest('Please set event frequency.', { expose: false }));
+    } else {
+      const payloadData = {
+        subscriberId: payload.subscriberId,
+        messageName: payload.messageName,
+        dueDate: payload.dueDate,
+        isCustom: payload.isCustom,
+        frequency: payload.frequency,
+        props: isNull(payload.props) ? payload.props : {},
+        customDays: isNull(payload.customDays) ? payload.customDays : [],
+        customDates: isNull(payload.customDates) ? payload.customDates : []
+      };
+      const url = `${BASE_URL}/scheduledEvents/scheduledEvent`;
       axios.post(url, payloadData).then(response => {
         return callback(response);
       }).catch((error) => {
