@@ -440,14 +440,14 @@ This will update a message which will be sent as a notification for a registered
 	let Message = notificationModule.execute(payload);
 ```
 
-`14. Send Email:`
-This will send email notification to the subscribers.
+`14. Send Campaign Email:`
+This will send email notification to a group of subscribers.
 
 ### Payload
 
 | Key | Type | Value | Description | Required |
 | --- | ---- | ----- | ----------- | -------- |
-| `action` | string | `SENDEMAIL` | key which defines the type of action to be performed | YES |
+| `action` | string | `SENDCAMPAIGNEMAIL` | key which defines the type of action to be performed | YES |
 | `meta` | json | Refer the objet keys below | Json having event, message and subscriber details. | YES |
 
 
@@ -455,8 +455,10 @@ This will send email notification to the subscribers.
 
 ```JSX
 	const metaInfo = {
-		"subscriberId": "",
+		"subscribers": [], //array of strings
 		"eventName": "CREATE_PAYER_MAIL",
+		"senderName": "", //optional
+		"senderEmail": "", //optional
 		"props": { // Dynmic data which will be replaced {{}}
 			"PAYERNAME": "",
 			"MERCHANTNAME": "",
@@ -466,7 +468,7 @@ This will send email notification to the subscribers.
 		}
 	}
 	const sendEmailPayload = {
-		"action": "SENDEMAIL",
+		"action": "SENDCAMPAIGNEMAIL",
 		"meta": metaInfo
 	};
 	let Message = notificationModule.execute(payload);
@@ -578,6 +580,8 @@ This will send email notification to the subscribers.
 	const metaInfo = {
 		"subscriberId": "",
 		"eventName": "CREATE_PAYER_MAIL",
+		"senderName": "", //optional
+		"senderEmail": "", //optional
 		"props": { // Dynmic data which will be replaced {{}}
 			"PAYERNAME": "",
 			"MERCHANTNAME": "",
