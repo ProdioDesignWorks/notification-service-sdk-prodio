@@ -604,7 +604,7 @@ const subscriberBulkUpload = function (payload, BASE_URL, callback) {
       return callback(new HttpErrors.BadRequest('Link is mandatory.', { expose: false }));
     } else {
       const url = `${BASE_URL}/notification-subscribers/bulkUpload?link=${payload.link}`;
-      axios.post(url, payloadProps).then(response => {
+      axios.put(url, {}).then(response => {
         return callback(response);
       }).catch((error) => {
         let json = CircularJSON.stringify(error);
