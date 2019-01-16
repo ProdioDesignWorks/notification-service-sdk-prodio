@@ -25,6 +25,12 @@ exports.CHANNEL_TYPES = [
      "WEB",
      "MOBILE"
 ];
+exports.ATTACHMENT_FILE_TYPES = [
+     "xlsx", "xls", "ods", "docx", "docm", "doc", "csv", "pdf", "txt", "gif", "jpg",
+     "jpeg", "png", "tif", "tiff", "rtf", "bmp", "cgm", "css", "shtml", "html", "htm",
+     "zip", "xml", "ppt", "pptx", "tar", "ez", "ics", "mobi", "msg", "pub", "eps" 
+];
+
 exports.CREATESUBSCRIBER = "CREATESUBSCRIBER";
 exports.READSUBSCRIBER = "READSUBSCRIBER";
 exports.DELETESUBSCRIBER = "DELETESUBSCRIBER";

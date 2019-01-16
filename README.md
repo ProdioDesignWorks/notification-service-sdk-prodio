@@ -415,7 +415,35 @@ This will update a message which will be sent as a notification for a registered
 	let Message = notificationModule.execute(payload);
 ```
 
-`13. Link Message with Event:`
+`13. Create message using HTML template:`
+ This will create/update a message with body using the html file link.
+
+### Payload
+
+| Key | Type | Value | Description | Required |
+| --- | ---- | ----- | ----------- | -------- |
+| `action` | string | `UPDATEMESSAGETEMPLATE` | key which defines the type of action to be performed | YES |
+| `meta` | json | Refer the objet keys below | Json having message and event name. | YES |
+
+
+#### Example
+
+```JSX
+	const metaInfo = {
+		"name": "SEND_MAIL_MESSAGE",
+		"type": "EMAIL",
+		"title": "Request",
+		"fileUrl":"https://domain.com/filename.html",
+		"eventName": "SEND_MAIL"
+	}
+	const  payload = {
+		"action": "UPDATEMESSAGETEMPLATE",
+		"meta": metaInfo
+	};
+	let Message = notificationModule.execute(payload);
+```
+
+`14. Link Message with Event:`
  This will link/map the given event and message for which the notifications will be sent.
 
 ### Payload
@@ -440,7 +468,7 @@ This will update a message which will be sent as a notification for a registered
 	let Message = notificationModule.execute(payload);
 ```
 
-`14. Send Campaign Email:`
+`15. Send Campaign Email:`
 This will send email notification to a group of subscribers.
 
 ### Payload
@@ -453,12 +481,19 @@ This will send email notification to a group of subscribers.
 
 #### Example
 
+##### List of Valid Attachment File Extensions
+
+     "xlsx", "xls", "ods", "docx", "docm", "doc", "csv", "pdf", "txt", "gif", "jpg",
+     "jpeg", "png", "tif", "tiff", "rtf", "bmp", "cgm", "css", "shtml", "html", "htm",
+     "zip", "xml", "ppt", "pptx", "tar", "ez", "ics", "mobi", "msg", "pub", "eps" 
+
 ```JSX
 	const metaInfo = {
 		"subscribers": [], //array of strings
 		"eventName": "CREATE_PAYER_MAIL",
 		"senderName": "", //optional
 		"senderEmail": "", //optional
+		"attachmentLink": "", //optional
 		"props": { // Dynmic data which will be replaced {{}}
 			"PAYERNAME": "",
 			"MERCHANTNAME": "",
@@ -475,7 +510,7 @@ This will send email notification to a group of subscribers.
 ```
 
 
-`15. Send App Notification:`
+`16. Send App Notification:`
 This will send app push notification to both android and ios to the subscribers.
 
 ### Payload
@@ -498,6 +533,9 @@ This will send app push notification to both android and ios to the subscribers.
 			"EMAIL": "",
 			"MOBILE": "",
 			"PASSWORD": "",
+		},
+		"data": {
+			"key": "value"
 		}
 	}
 	const sendEmailPayload = {
@@ -507,7 +545,7 @@ This will send app push notification to both android and ios to the subscribers.
 	let Message = notificationModule.execute(payload);
 ```
 
-`16. Send Web Notification:`
+`17. Send Web Notification:`
 This will send web push notification to both android and ios to the subscribers.
 
 ### Payload
@@ -530,6 +568,9 @@ This will send web push notification to both android and ios to the subscribers.
 			"EMAIL": "",
 			"MOBILE": "",
 			"PASSWORD": "",
+		},
+		"data": {
+			"key": "value"
 		}
 	}
 	const sendEmailPayload = {
@@ -539,7 +580,7 @@ This will send web push notification to both android and ios to the subscribers.
 	let Message = notificationModule.execute(payload);
 ```
 
-`17. Batch creation of Subscribers:`
+`18. Batch creation of Subscribers:`
 This will send web push notification to both android and ios to the subscribers.
 
 ### Payload
@@ -563,7 +604,7 @@ This will send web push notification to both android and ios to the subscribers.
 	let Subscribers = notificationModule.execute(payload);
 ```
 
-`18. Send Transactional Email:`
+`19. Send Transactional Email:`
 This will send email notification to the subscribers.
 
 ### Payload
@@ -582,6 +623,7 @@ This will send email notification to the subscribers.
 		"eventName": "CREATE_PAYER_MAIL",
 		"senderName": "", //optional
 		"senderEmail": "", //optional
+		"attachmentLink": "",
 		"props": { // Dynmic data which will be replaced {{}}
 			"PAYERNAME": "",
 			"MERCHANTNAME": "",
@@ -597,7 +639,7 @@ This will send email notification to the subscribers.
 	let Message = notificationModule.execute(payload);
 ```
 
-`19. Create Schedule Events:`
+`20. Create Schedule Events:`
 This will send notifications to the subscribers based on the scheduled data.
 
 ### Payload
@@ -623,6 +665,7 @@ This will send notifications to the subscribers based on the scheduled data.
 ```JSX
 
 	const metaInfo = {
+		"trackingId": "", //unique and mandatory
 		"subscriberId": "", //existing subscriber Id
 		"messageName": "", //exisiting message
 		"dueDate": "", //final date till which the notification is to be sent
@@ -630,7 +673,10 @@ This will send notifications to the subscribers based on the scheduled data.
 		"frequency": "", //refer above for values
 		"props": {}, // Dynmic data which will be replaced {{}}
 		"customDays": [],
-		"customDates": []
+		"customDates": [],
+		"senderEmail": "",//optional
+		"senderName": "",//optional
+		"attachmentLink": "",//optional
 	}
 	const payload = {
 		"action": "ADDSCHEDULEDEVENT",
@@ -639,7 +685,7 @@ This will send notifications to the subscribers based on the scheduled data.
 	let Message = notificationModule.execute(payload);
 ```
 
-`20. Delete Schedule Events:`
+`21. Delete Schedule Events:`
 This will delete scheduled notifications for the subscriber based on the message name.
 
 ### Payload
@@ -655,8 +701,7 @@ This will delete scheduled notifications for the subscriber based on the message
 ```JSX
 
 	const metaInfo = {
-		"subscriberId": "", //existing subscriber Id
-		"messageName": "", //exisiting message
+		"trackingId": "", //existing
 	}
 	const payload = {
 		"action": "DELETESCHEDULEDEVENT",
@@ -665,7 +710,7 @@ This will delete scheduled notifications for the subscriber based on the message
 	let Message = notificationModule.execute(payload);
 ```
 
-`21. Update Schedule Events:`
+`22. Update Schedule Events:`
 This will update scheduled notifications for the subscribers based on the message name.
 
 ### Payload
@@ -693,6 +738,7 @@ This will update scheduled notifications for the subscribers based on the messag
 	Note: Event will be updated based on the subscriberId and messageName. So make sure it is the same as what was used while creating a scheduled event.
 
 	const metaInfo = {
+		"trackingId": "", //unique and mandatory, this will be used to update
 		"subscriberId": "", //existing subscriber Id
 		"messageName": "", //exisiting message
 		"dueDate": "", //final date till which the notification is to be sent
@@ -700,7 +746,10 @@ This will update scheduled notifications for the subscribers based on the messag
 		"frequency": "", //refer above for values
 		"props": {}, // Dynmic data which will be replaced {{}}
 		"customDays": [],
-		"customDates": []
+		"customDates": [],
+		"senderEmail": "",//optional
+		"senderName": "",//optional
+		"attachmentLink": "",//optional
 	}
 	const payload = {
 		"action": "UPDATESCHEDULEDEVENT",
