@@ -6,7 +6,7 @@ const CircularJSON = require('circular-json');
 
 const { APP_NOTIFICATION_TEMPLATE, EMAIL_NOTIFICATION_TEMPLATE, SMS_NOTIFICATION_TEMPLATE, TEMPLATE_TYPES,
   ANDROID_TOKEN, IOS_TOKEN, WEB_TOKEN, EMAIL_TOKEN, SMS_TOKEN,
-  TOKEN_TYPES, CHANNEL_TYPES,
+  TOKEN_TYPES, CHANNEL_TYPES, ATTACHMENT_FILE_TYPES,
   CREATESUBSCRIBER, READSUBSCRIBER, DELETESUBSCRIBER, UPDATESUBSCRIBER,
   CREATEEVENT, READEVENT, DELETEEVENT, UPDATEEVENT,
   ADDSCHEDULEDEVENT, DELETESCHEDULEDEVENT, UPDATESCHEDULEDEVENT,
@@ -221,21 +221,21 @@ const updateNotificationConsumer = function (payload, BASE_URL, callback) {
         };
         subscriberTokens.push(smsToken);
       }
-      if (!isNull(payload.webToken)) {
+      if (!isNull(payload.webToken) || payload.webToken === "") {
         const webToken = {
           "type": WEB_TOKEN,
           "token": payload.webToken
         };
         subscriberTokens.push(webToken);
       }
-      if (!isNull(payload.androidToken)) {
+      if (!isNull(payload.androidToken) || payload.webToken === "") {
         const androidToken = {
           "type": ANDROID_TOKEN,
           "token": payload.androidToken
         };
         subscriberTokens.push(androidToken);
       }
-      if (!isNull(payload.iosToken)) {
+      if (!isNull(payload.iosToken) || payload.webToken === "") {
         const iosToken = {
           "type": IOS_TOKEN,
           "token": payload.iosToken
@@ -524,12 +524,8 @@ const sendTransactionalMail = function (payload, BASE_URL, callback) {
     } else if (isNull(payload.subscriberId)) {
       return callback(new HttpErrors.BadRequest('Subscriber Id is mandatory.', { expose: false }));
     } else {
-      let payloadProps = {};
-      if (!isNull(payload.props)) {
-        payloadProps = payload.props
-      }
-      const url = `${BASE_URL}/notification-subscribers/transEmail?eventName=${payload.eventName}&subscriberId=${payload.subscriberId}&senderEmail=${payload.senderEmail}&senderName=${payload.senderName}`;
-      axios.post(url, payloadProps).then(response => {
+      const url = `${BASE_URL}/notification-subscribers/transEmail`;
+      axios.post(url, payload).then(response => {
         return callback(response);
       }).catch((error) => {
         let json = CircularJSON.stringify(error);
@@ -644,7 +640,9 @@ const createScheduledEvent = function (payload, BASE_URL, callback) {
     return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
   } else {
     payload = payload.meta;
-    if (isNull(payload.subscriberId)) {
+    if (isNull(payload.trackingId)) {
+      return callback(new HttpErrors.BadRequest('Event tracking Id is mandatory.', { expose: false }));
+    } else if (isNull(payload.subscriberId)) {
       return callback(new HttpErrors.BadRequest('Subscriber Id is mandatory.', { expose: false }));
     } else if (isNull(payload.messageName)) {
       return callback(new HttpErrors.BadRequest('Message name is mandatory.', { expose: false }));
@@ -656,14 +654,18 @@ const createScheduledEvent = function (payload, BASE_URL, callback) {
       return callback(new HttpErrors.BadRequest('Please set event frequency.', { expose: false }));
     } else {
       const payloadData = {
+        trackingId: payload.trackingId,
         subscriberId: payload.subscriberId,
         messageName: payload.messageName,
         dueDate: payload.dueDate,
         isCustom: payload.isCustom,
         frequency: payload.frequency,
-        props: isNull(payload.props) ? payload.props : {},
-        customDays: isNull(payload.customDays) ? payload.customDays : [],
-        customDates: isNull(payload.customDates) ? payload.customDates : []
+        props: !isNull(payload.props) ? payload.props : {},
+        customDays: !isNull(payload.customDays) ? payload.customDays : [],
+        customDates: !isNull(payload.customDates) ? payload.customDates : [],
+        senderEmail: !isNull(payload.senderEmail) ? payload.senderEmail : "",
+        senderName: !isNull(payload.senderName) ? payload.senderName : "",
+        attachmentLink: !isNull(payload.attachmentLink) ? payload.attachmentLink : "",
       };
       const url = `${BASE_URL}/scheduledEvents/scheduledEvent`;
       axios.post(url, payloadData).then(response => {
@@ -681,14 +683,11 @@ const deleteScheduledEvent = function (payload, BASE_URL, callback) {
     return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
   } else {
     payload = payload.meta;
-    if (isNull(payload.subscriberId)) {
-      return callback(new HttpErrors.BadRequest('Subscriber Id is mandatory.', { expose: false }));
-    } else if (isNull(payload.messageName)) {
-      return callback(new HttpErrors.BadRequest('Message name is mandatory.', { expose: false }));
+    if (isNull(payload.trackingId)) {
+      return callback(new HttpErrors.BadRequest('Event Tracking Id is mandatory.', { expose: false }));
     } else {
       const payloadData = {
-        subscriberId: payload.subscriberId,
-        messageName: payload.messageName,
+        trackingId: payload.trackingId
       };
       const url = `${BASE_URL}/scheduledEvents/scheduledEvent`;
       axios.delete(url, payloadData).then(response => {
@@ -706,7 +705,9 @@ const updateScheduledEvent = function (payload, BASE_URL, callback) {
     return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
   } else {
     payload = payload.meta;
-    if (isNull(payload.subscriberId)) {
+    if (isNull(payload.trackingId)) {
+      return callback(new HttpErrors.BadRequest('Event tracking Id is mandatory.', { expose: false }));
+    } else if (isNull(payload.subscriberId)) {
       return callback(new HttpErrors.BadRequest('Subscriber Id is mandatory.', { expose: false }));
     } else if (isNull(payload.messageName)) {
       return callback(new HttpErrors.BadRequest('Message name is mandatory.', { expose: false }));
@@ -718,14 +719,18 @@ const updateScheduledEvent = function (payload, BASE_URL, callback) {
       return callback(new HttpErrors.BadRequest('Please set event frequency.', { expose: false }));
     } else {
       const payloadData = {
+        trackingId: payload.trackingId,
         subscriberId: payload.subscriberId,
         messageName: payload.messageName,
         dueDate: payload.dueDate,
         isCustom: payload.isCustom,
         frequency: payload.frequency,
-        props: isNull(payload.props) ? payload.props : {},
-        customDays: isNull(payload.customDays) ? payload.customDays : [],
-        customDates: isNull(payload.customDates) ? payload.customDates : []
+        props: !isNull(payload.props) ? payload.props : {},
+        customDays: !isNull(payload.customDays) ? payload.customDays : [],
+        customDates: !isNull(payload.customDates) ? payload.customDates : [],
+        senderEmail: !isNull(payload.senderEmail) ? payload.senderEmail : "",
+        senderName: !isNull(payload.senderName) ? payload.senderName : "",
+        attachmentLink: !isNull(payload.attachmentLink) ? payload.attachmentLink : "",
       };
       const url = `${BASE_URL}/scheduledEvents/scheduledEvent`;
       axios.put(url, payloadData).then(response => {
