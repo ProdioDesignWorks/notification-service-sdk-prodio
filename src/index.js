@@ -686,11 +686,8 @@ const deleteScheduledEvent = function (payload, BASE_URL, callback) {
     if (isNull(payload.trackingId)) {
       return callback(new HttpErrors.BadRequest('Event Tracking Id is mandatory.', { expose: false }));
     } else {
-      const payloadData = {
-        trackingId: payload.trackingId
-      };
-      const url = `${BASE_URL}/scheduledEvents/scheduledEvent`;
-      axios.delete(url, payloadData).then(response => {
+      const url = `${BASE_URL}/scheduledEvents/deleteScheduledEvent`;
+      axios.post(url, payload).then(response => {
         return callback(response);
       }).catch((error) => {
         let json = CircularJSON.stringify(error);
