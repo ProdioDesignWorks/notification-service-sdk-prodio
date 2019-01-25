@@ -1,6 +1,6 @@
 {
   "name": "notifications-module-prodio",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "description": "NPM for consuming prodio notification service",
   "main": "lib/index.js",
   "scripts": {

@@ -28,8 +28,9 @@ const isValidEmail = function (val) {
   return regex.test(val);
 };
 const isValidPhoneNumber = function (val) {
+  val = String(val);
   val = val.trim();
-  var regex = /^(\+91[\-\s]?)?[0]?(91)?[789]\d{9}$/;
+  var regex = /^((?:\+|00)[17](?: |\-)?|(?:\+|00)[1-9]\d{0,2}(?: |\-)?|(?:\+|00)1\-\d{3}(?: |\-)?)?(0\d|\([0-9]{3}\)|[1-9]{0,3})(?:((?: |\-)[0-9]{2}){4}|((?:[0-9]{2}){4})|((?: |\-)[0-9]{3}(?: |\-)[0-9]{4})|([0-9]{7}))$/;
   /*/^(\+\d{1,3}[- ]?)?\d{10}$/;*/
   return regex.test(val);
 };
