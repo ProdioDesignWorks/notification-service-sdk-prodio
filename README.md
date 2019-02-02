@@ -204,7 +204,11 @@ This will delete a notification service subscriber with their channel tokens.
 ```JSX
 	const  payload = {
 		"action": "READEVENT",
+		"meta": {
+			"name" : "eventName"
+		}
 	};
+	** Meta key is optional, if supplied only that event data(can be comma seperated strings) will be returned
 	let Event = notificationModule.execute(payload);
 ```
 
@@ -334,7 +338,11 @@ This will create a message which will be sent as a notification for a registered
 ```JSX
 	const  payload = {
 		"action": "READMESSAGE",
+		"meta": {
+			"name": "message name"
+		}
 	};
+	** Meta key is optional, if supplied only that event data(can be comma seperated strings) will be returned
 	let Message = notificationModule.execute(payload);
 ```
 

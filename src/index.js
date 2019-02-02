@@ -12,7 +12,7 @@ const { APP_NOTIFICATION_TEMPLATE, EMAIL_NOTIFICATION_TEMPLATE, SMS_NOTIFICATION
   ADDSCHEDULEDEVENT, DELETESCHEDULEDEVENT, UPDATESCHEDULEDEVENT,
   CREATEMESSAGE, READMESSAGE, DELETEMESSAGE, UPDATEMESSAGE, UPDATEMESSAGETEMPLATE,
   CHANNELEMAIL, SENDCAMPAIGNEMAIL, SENDTRANSACTIONALEMAIL, SENDPUSHNOTIFICATION, SENDWEBPUSHNOTIFICATION,
-  CREATESUBSCRIBERGROUP, SUBSCRIBERBULKUPLOAD
+  CREATESUBSCRIBERGROUP, SUBSCRIBERBULKUPLOAD, LINKEVENTMESSAGE
 } = require('./config/constant.js');
 
 const isNull = function (val) {
@@ -61,7 +61,7 @@ function notificationModule(BASE_URL) {
     } else if (payload.action === CREATEEVENT) {
       return createEvent(payload, BASE_URL, callback);
     } else if (payload.action === READEVENT) {
-      return getEvent(BASE_URL, callback);
+      return getEvent(payload, BASE_URL, callback);
     } else if (payload.action === DELETEEVENT) {
       return deleteEvent(payload, BASE_URL, callback);
     } else if (payload.action === UPDATEEVENT) {
@@ -69,7 +69,7 @@ function notificationModule(BASE_URL) {
     } else if (payload.action === CREATEMESSAGE) {
       return createMessage(payload, BASE_URL, callback);
     } else if (payload.action === READMESSAGE) {
-      return getMessages(BASE_URL, callback);
+      return getMessages(payload, BASE_URL, callback);
     } else if (payload.action === DELETEMESSAGE) {
       return deleteMessage(payload, BASE_URL, callback);
     } else if (payload.action === UPDATEMESSAGE) {
@@ -94,6 +94,8 @@ function notificationModule(BASE_URL) {
       return deleteScheduledEvent(payload, BASE_URL, callback);
     } else if (payload.action === UPDATESCHEDULEDEVENT) {
       return updateScheduledEvent(payload, BASE_URL, callback);
+    } else if (payload.action === LINKEVENTMESSAGE) {
+      return linkEventMessage(payload, BASE_URL, callback);
     } else {
       return callback(new HttpErrors.BadRequest('Invalid Action.', { expose: false }));
     }
@@ -296,14 +298,20 @@ const createEvent = function (payload, BASE_URL, callback) {
   }
 }
 
-const getEvent = function (BASE_URL, callback) {
-  const url = `${BASE_URL}/events/event`;
-  axios.get(url).then(response => {
-    return callback(response);
-  }).catch((error) => {
-    let json = CircularJSON.stringify(error);
-    return callback(json);
-  });
+const getEvent = function (payload, BASE_URL, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    let eventFilterName = "";
+    if (!isNull(payload.meta) && !isNull(payload.meta.name)) { eventFilterName = payload.meta.name; }
+    const url = `${BASE_URL}/events/event?event=${eventFilterName}`;
+    axios.get(url).then(response => {
+      return callback(response);
+    }).catch((error) => {
+      let json = CircularJSON.stringify(error);
+      return callback(json);
+    });
+  }
 }
 
 const deleteEvent = function (payload, BASE_URL, callback) {
@@ -396,13 +404,19 @@ const createMessage = function (payload, BASE_URL, callback) {
 }
 
 const getMessages = function (BASE_URL, callback) {
-  const url = `${BASE_URL}/message/message`;
-  axios.get(url).then(response => {
-    return callback(response);
-  }).catch((error) => {
-    let json = CircularJSON.stringify(error);
-    return callback(json);
-  });
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    let messageFilterName = "";
+    if (!isNull(payload.meta) && !isNull(payload.meta.name)) { messageFilterName = payload.meta.name; }
+    const url = `${BASE_URL}/message/message?message=${messageFilterName}`;
+    axios.get(url).then(response => {
+      return callback(response);
+    }).catch((error) => {
+      let json = CircularJSON.stringify(error);
+      return callback(json);
+    });
+  }
 }
 
 const deleteMessage = function (payload, BASE_URL, callback) {
@@ -732,6 +746,27 @@ const updateScheduledEvent = function (payload, BASE_URL, callback) {
       };
       const url = `${BASE_URL}/scheduledEvents/scheduledEvent`;
       axios.put(url, payloadData).then(response => {
+        return callback(response);
+      }).catch((error) => {
+        let json = CircularJSON.stringify(error);
+        return callback(json);
+      });
+    }
+  }
+}
+
+const linkEventMessage = function (payload, BASE_URL, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    payload = payload.meta;
+    if (isNull(payload.messageName)) {
+      return callback(new HttpErrors.BadRequest('Message is mandatory.', { expose: false }));
+    } else if (isNull(payload.eventName)) {
+      return callback(new HttpErrors.BadRequest('Event is mandatory.', { expose: false }));
+    } else {
+      const url = `${BASE_URL}/message/link`;
+      axios.post(url, payload).then(response => {
         return callback(response);
       }).catch((error) => {
         let json = CircularJSON.stringify(error);
