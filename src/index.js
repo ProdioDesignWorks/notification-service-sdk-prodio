@@ -681,6 +681,7 @@ const createScheduledEvent = function (payload, BASE_URL, callback) {
         senderEmail: !isNull(payload.senderEmail) ? payload.senderEmail : "",
         senderName: !isNull(payload.senderName) ? payload.senderName : "",
         attachmentLink: !isNull(payload.attachmentLink) ? payload.attachmentLink : "",
+        clickAction: !isNull(payload.clickAction) ? payload.clickAction : ""
       };
       const url = `${BASE_URL}/scheduledEvents/scheduledEvent`;
       axios.post(url, payloadData).then(response => {
@@ -743,6 +744,7 @@ const updateScheduledEvent = function (payload, BASE_URL, callback) {
         senderEmail: !isNull(payload.senderEmail) ? payload.senderEmail : "",
         senderName: !isNull(payload.senderName) ? payload.senderName : "",
         attachmentLink: !isNull(payload.attachmentLink) ? payload.attachmentLink : "",
+        clickAction: !isNull(payload.clickAction) ? payload.clickAction : ""
       };
       const url = `${BASE_URL}/scheduledEvents/scheduledEvent`;
       axios.put(url, payloadData).then(response => {
