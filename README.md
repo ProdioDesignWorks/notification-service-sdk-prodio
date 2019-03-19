@@ -103,7 +103,7 @@ This will list all the notification service subscribers with their channel token
 ```
 
 `3. Update Subscribers:`
-This will update a notification service subscribers with their channel tokens.
+This will update an existing or create a new notification service subscribers with their channel tokens.
 
 ### Payload
 
@@ -535,6 +535,7 @@ This will send app push notification to both android and ios to the subscribers.
 	const metaInfo = {
 		"subscriberId": "",
 		"eventName": "CREATE_PAYER_MAIL",
+		"clickAction": "", //optional
 		"props": { // Dynmic data which will be replaced {{}}
 			"PAYERNAME": "",
 			"MERCHANTNAME": "",
@@ -570,6 +571,7 @@ This will send web push notification to both android and ios to the subscribers.
 	const metaInfo = {
 		"subscriberId": "",
 		"eventName": "CREATE_PAYER_MAIL",
+		"clickAction": "", //optional
 		"props": { // Dynmic data which will be replaced {{}}
 			"PAYERNAME": "",
 			"MERCHANTNAME": "",
@@ -685,6 +687,7 @@ This will send notifications to the subscribers based on the scheduled data.
 		"senderEmail": "",//optional
 		"senderName": "",//optional
 		"attachmentLink": "",//optional
+		"clickAction": "" //optional
 	}
 	const payload = {
 		"action": "ADDSCHEDULEDEVENT",
@@ -758,6 +761,7 @@ This will update scheduled notifications for the subscribers based on the messag
 		"senderEmail": "",//optional
 		"senderName": "",//optional
 		"attachmentLink": "",//optional
+		"clickAction": "" //optional
 	}
 	const payload = {
 		"action": "UPDATESCHEDULEDEVENT",
