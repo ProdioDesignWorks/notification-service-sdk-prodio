@@ -403,7 +403,7 @@ const createMessage = function (payload, BASE_URL, callback) {
   }
 }
 
-const getMessages = function (BASE_URL, callback) {
+const getMessages = function (payload, BASE_URL, callback) {
   if (!isJson(payload)) {
     return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
   } else {
