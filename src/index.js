@@ -113,8 +113,9 @@ const createNotificationConsumer = function (payload, BASE_URL, callback) {
       return callback(new HttpErrors.BadRequest('Subscriber Id is mandatory.', { expose: false }));
     } else if (!isNull(payload.email) && !isValidEmail(payload.email)) {
       return callback(new HttpErrors.BadRequest('Invalid Email Address.', { expose: false }));
-    } else if (!isNull(payload.phone) && !isValidPhoneNumber(payload.phone)) {
-      return callback(new HttpErrors.BadRequest('Invalid Phone Number.', { expose: false }));
+      //&& !isValidPhoneNumber(payload.phone)
+    } else if (!isNull(payload.phone)) {
+      return callback(new HttpErrors.BadRequest('Please Provide Phone Number.', { expose: false }));
     } else {
       let subscriberTokens = [];
       if (!isNull(payload.email)) {
