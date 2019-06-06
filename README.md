@@ -74,6 +74,7 @@ This application will run as a separate micro-service independent of your produc
 		"webToken": "", //(mandatory for web notifications using FCM)
 		"androidToken": "", //(mandatory for push notifications using FCM)
 		"iosToken": "", //(mandatory for push notifications using FCM)
+		"safariToken":"",//(mandatory for safari push notifications using APN)
 		"metaData": {} //JSON object - can be any user related information
 	};
 	const  payload = {
@@ -123,6 +124,7 @@ This will update an existing or create a new notification service subscribers wi
 		"webToken": "", //(mandatory for web notifications using FCM)
 		"androidToken": "", //(mandatory for push notifications using FCM)
 		"iosToken": "", //(mandatory for push notifications using FCM)
+		"safariToken":"",//(mandatory for safari push notifications using APN)
 		"metaData": {} //JSON object - can be any user related information
 	};
 	const  payload = {
@@ -536,6 +538,7 @@ This will send app push notification to both android and ios to the subscribers.
 		"subscriberId": "",
 		"eventName": "CREATE_PAYER_MAIL",
 		"clickAction": "", //optional
+		"urlArgs": [ ], //urlFormatString arguments for safari notifiation redirection
 		"props": { // Dynmic data which will be replaced {{}}
 			"PAYERNAME": "",
 			"MERCHANTNAME": "",
@@ -552,6 +555,24 @@ This will send app push notification to both android and ios to the subscribers.
 		"meta": metaInfo
 	};
 	let Message = notificationModule.execute(payload);
+
+	Note: The value for "urlArgs" must be an array and should contain number of items you have defined in your    		  	urlFormatString while configuring the Safari PushPackage. For example - 
+	Your Website Json is as follows :
+	{
+		"websiteName": "Bay Airlines",
+		"websitePushID": "web.com.example.domain",
+		"allowedDomains": ["http://domain.example.com"],
+		"urlFormatString": "http://domain.example.com/%@/?flight=%@",
+		"authenticationToken": "XXXXXXXXXXXXXXXX",
+		"webServiceURL": "https://example.com/push"
+	}
+	Since you have defined two "%@" argument placeholders, the "urlArgs" should contain two items as 
+        metaInfo = {
+			..
+		    "urlArgs": ["boarding", "A998"]
+		    ..
+		}
+
 ```
 
 `17. Send Web Notification:`
