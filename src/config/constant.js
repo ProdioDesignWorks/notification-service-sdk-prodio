@@ -12,12 +12,14 @@ exports.IOS_TOKEN = "IOS_TOKEN";
 exports.WEB_TOKEN = "WEB_TOKEN";
 exports.EMAIL_TOKEN = "EMAIL_TOKEN";
 exports.SMS_TOKEN = "SMS_TOKEN";
+exports.SAFARI_TOKEN = "SAFARI_TOKEN";
 exports.TOKEN_TYPES = [
      "ANDROID_TOKEN",
      "IOS_TOKEN",
      "WEB_TOKEN",
      "EMAIL_TOKEN",
-     "SMS_TOKEN"
+     "SMS_TOKEN",
+     "SAFARI_TOKEN"
 ];
 exports.CHANNEL_TYPES = [
      "SMS",
