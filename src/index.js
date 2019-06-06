@@ -150,6 +150,13 @@ const createNotificationConsumer = function (payload, BASE_URL, callback) {
         };
         subscriberTokens.push(iosToken);
       }
+      if (!isNull(payload.safariToken)) {
+        const safariToken = {
+          "type": SAFARI_TOKEN,
+          "token": payload.safariToken
+        };
+        subscriberTokens.push(safariToken);
+      }
       const url = `${BASE_URL}/notification-subscribers/subscriber`;
       const requestPayload = {
         "subscriberId": payload.subscriberId,
@@ -240,6 +247,13 @@ const updateNotificationConsumer = function (payload, BASE_URL, callback) {
           "token": payload.iosToken
         };
         subscriberTokens.push(iosToken);
+      }
+      if (!isNull(payload.safariToken)) {
+        const safariToken = {
+          "type": SAFARI_TOKEN,
+          "token": payload.safariToken
+        };
+        subscriberTokens.push(safariToken);
       }
       const url = `${BASE_URL}/notification-subscribers/subscriber`;
       const requestPayload = {
@@ -590,6 +604,9 @@ const sendWebPushNotifications = function (payload, BASE_URL, callback) {
       }
       if (!isNull(payload.data)) {
         payloadProps.notificationData = payload.data
+      }
+      if (!isNull(payload.urlArgs)) {
+        payloadProps.urlArgs = payload.urlArgs
       }
       const url = `${BASE_URL}/notification-subscribers/webNotification?eventName=${payload.eventName}&subscriberId=${payload.subscriberId}`;
       axios.post(url, payloadProps).then(response => {
