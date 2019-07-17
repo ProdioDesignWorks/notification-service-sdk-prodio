@@ -790,3 +790,85 @@ This will update scheduled notifications for the subscribers based on the messag
 	};
 	let Message = notificationModule.execute(payload);
 ```
+`23. List Notifications:`
+ This will list all the notifications sent to a subscriber on a particular channel.
+
+### Payload
+
+| Key | Type | Value | Description | Required |
+| --- | ---- | ----- | ----------- | -------- |
+| `action` | string | `LISTNOTIFCATIONS` | key which defines the type of action to be performed | YES |
+| `meta` | json | { "subscriberId": "", "type": "", "pageNo" : 1, "limit" : 10 } | Json having event details. | YES |
+
+
+##### List of Valid Types
+		1. SMS
+		2. EMAIL
+		3. WEB
+		4. MOBILE
+
+#### Example
+
+```JSX
+
+	const metaInfo = {
+		"subscriberId": "1234567890",
+		"type": "EMAIL",
+		"pageNo": 1,
+		"limit": 10
+	};
+	const  payload = {
+		"action": "LISTNOTIFCATIONS",
+		"meta": metaInfo
+	};
+	let Event = notificationModule.execute(payload);
+```
+
+`24. Read Notification:`
+ This will mark a single notification as read.
+
+### Payload
+
+| Key | Type | Value | Description | Required |
+| --- | ---- | ----- | ----------- | -------- |
+| `action` | string | `READNOTIFICATION` | key which defines the type of action to be performed | YES |
+| `meta` | json | { "logId": "" } | Json having event details. | YES |
+
+#### Example
+
+```JSX
+
+	const metaInfo = {
+		"logId": "1234567890"
+	};
+	const  payload = {
+		"action": "READNOTIFICATION",
+		"meta": metaInfo
+	};
+	let Event = notificationModule.execute(payload);
+```
+
+`25. Read All Notification:`
+ This will mark all notifications of a channel as read.
+
+### Payload
+
+| Key | Type | Value | Description | Required |
+| --- | ---- | ----- | ----------- | -------- |
+| `action` | string | `READALLNOTIFICATIONS` | key which defines the type of action to be performed | YES |
+| `meta` | json | { "subscriberId": "", "type": "" } | Json having event details. | YES |
+
+#### Example
+
+```JSX
+
+	const metaInfo = {
+		"subscriberId": "1234567890",
+		"type": "EMAIL"
+	};
+	const  payload = {
+		"action": "READALLNOTIFICATIONS",
+		"meta": metaInfo
+	};
+	let Event = notificationModule.execute(payload);
+```
