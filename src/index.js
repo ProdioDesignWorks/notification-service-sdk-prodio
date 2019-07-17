@@ -12,7 +12,8 @@ const { APP_NOTIFICATION_TEMPLATE, EMAIL_NOTIFICATION_TEMPLATE, SMS_NOTIFICATION
   ADDSCHEDULEDEVENT, DELETESCHEDULEDEVENT, UPDATESCHEDULEDEVENT,
   CREATEMESSAGE, READMESSAGE, DELETEMESSAGE, UPDATEMESSAGE, UPDATEMESSAGETEMPLATE,
   CHANNELEMAIL, SENDCAMPAIGNEMAIL, SENDTRANSACTIONALEMAIL, SENDPUSHNOTIFICATION, SENDWEBPUSHNOTIFICATION,
-  CREATESUBSCRIBERGROUP, SUBSCRIBERBULKUPLOAD, LINKEVENTMESSAGE
+  CREATESUBSCRIBERGROUP, SUBSCRIBERBULKUPLOAD, LINKEVENTMESSAGE,
+  READNOTIFICATION, READALLNOTIFICATIONS, LISTNOTIFCATIONS
 } = require('./config/constant.js');
 
 const isNull = function (val) {
@@ -96,6 +97,12 @@ function notificationModule(BASE_URL) {
       return updateScheduledEvent(payload, BASE_URL, callback);
     } else if (payload.action === LINKEVENTMESSAGE) {
       return linkEventMessage(payload, BASE_URL, callback);
+    } else if (payload.action === READNOTIFICATION) {
+      return readNotification(payload, BASE_URL, callback);
+    } else if (payload.action === READALLNOTIFICATIONS) {
+      return readAllNotifications(payload, BASE_URL, callback);
+    } else if (payload.action === LISTNOTIFCATIONS) {
+      return listNotifications(payload, BASE_URL, callback);
     } else {
       return callback(new HttpErrors.BadRequest('Invalid Action.', { expose: false }));
     }
@@ -782,6 +789,71 @@ const linkEventMessage = function (payload, BASE_URL, callback) {
     } else {
       const url = `${BASE_URL}/message/link`;
       axios.post(url, payload).then(response => {
+        return callback(response);
+      }).catch((error) => {
+        let json = CircularJSON.stringify(error);
+        return callback(json);
+      });
+    }
+  }
+}
+
+const readNotification = function (payload, BASE_URL, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    payload = payload.meta;
+    if (isNull(payload.logId)) {
+      return callback(new HttpErrors.BadRequest('Log Id is mandatory.', { expose: false }));
+    } else {
+      const url = `${BASE_URL}/notificationLogs/read?logId=${payload.logId}`;
+      axios.post(url, payload).then(response => {
+        return callback(response);
+      }).catch((error) => {
+        let json = CircularJSON.stringify(error);
+        return callback(json);
+      });
+    }
+  }
+}
+
+const readAllNotifications = function (payload, BASE_URL, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    payload = payload.meta;
+    if (isNull(payload.subscriberId)) {
+      return callback(new HttpErrors.BadRequest('Subscriber Id is mandatory.', { expose: false }));
+    } else if (isNull(payload.type)) {
+      return callback(new HttpErrors.BadRequest('Type or Channel is mandatory.', { expose: false }));
+    } else {
+      const url = `${BASE_URL}/notificationLogs/readAll`;
+      axios.post(url, payload).then(response => {
+        return callback(response);
+      }).catch((error) => {
+        let json = CircularJSON.stringify(error);
+        return callback(json);
+      });
+    }
+  }
+}
+
+const listNotifications = function (payload, BASE_URL, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
+  } else {
+    payload = payload.meta;
+    if (isNull(payload.subscriberId)) {
+      return callback(new HttpErrors.BadRequest('Subscriber Id is mandatory.', { expose: false }));
+    } else if (isNull(payload.type)) {
+      return callback(new HttpErrors.BadRequest('Type or Channel is mandatory.', { expose: false }));
+    } else if (isNull(payload.pageNo)) {
+      return callback(new HttpErrors.BadRequest('Page no is mandatory.', { expose: false }));
+    } else if (isNull(payload.limit)) {
+      return callback(new HttpErrors.BadRequest('Advisors is mandatory.', { expose: false }));
+    } else {
+      const url = `${BASE_URL}/notificationLogs/list?subscriberId=&type=&pageNo=&pageNo=`;
+      axios.get(url).then(response => {
         return callback(response);
       }).catch((error) => {
         let json = CircularJSON.stringify(error);

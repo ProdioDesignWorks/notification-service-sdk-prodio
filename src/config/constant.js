@@ -2,8 +2,8 @@ exports.APP_NOTIFICATION_TEMPLATE = "APP_NOTIFICATION_TEMPLATE";
 exports.EMAIL_NOTIFICATION_TEMPLATE = "EMAIL_NOTIFICATION_TEMPLATE";
 exports.SMS_NOTIFICATION_TEMPLATE = "SMS_NOTIFICATION_TEMPLATE";
 exports.TEMPLATE_TYPES = [
-     "APP_NOTIFICATION_TEMPLATE", 
-     "EMAIL_NOTIFICATION_TEMPLATE", 
+     "APP_NOTIFICATION_TEMPLATE",
+     "EMAIL_NOTIFICATION_TEMPLATE",
      "SMS_NOTIFICATION_TEMPLATE",
 ];
 
@@ -30,7 +30,7 @@ exports.CHANNEL_TYPES = [
 exports.ATTACHMENT_FILE_TYPES = [
      "xlsx", "xls", "ods", "docx", "docm", "doc", "csv", "pdf", "txt", "gif", "jpg",
      "jpeg", "png", "tif", "tiff", "rtf", "bmp", "cgm", "css", "shtml", "html", "htm",
-     "zip", "xml", "ppt", "pptx", "tar", "ez", "ics", "mobi", "msg", "pub", "eps" 
+     "zip", "xml", "ppt", "pptx", "tar", "ez", "ics", "mobi", "msg", "pub", "eps"
 ];
 
 exports.CREATESUBSCRIBER = "CREATESUBSCRIBER";
@@ -57,3 +57,6 @@ exports.ADDSCHEDULEDEVENT = "ADDSCHEDULEDEVENT";
 exports.DELETESCHEDULEDEVENT = "DELETESCHEDULEDEVENT";
 exports.UPDATESCHEDULEDEVENT = "UPDATESCHEDULEDEVENT";
 exports.LINKEVENTMESSAGE = "LINKEVENTMESSAGE";
+exports.READNOTIFICATION = "READNOTIFICATION";
+exports.READALLNOTIFICATIONS = "READALLNOTIFICATIONS";
+exports.LISTNOTIFCATIONS = "LISTNOTIFCATIONS";
