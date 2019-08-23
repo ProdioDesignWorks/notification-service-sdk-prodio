@@ -852,7 +852,7 @@ const listNotifications = function (payload, BASE_URL, callback) {
     } else if (isNull(payload.limit)) {
       return callback(new HttpErrors.BadRequest('Advisors is mandatory.', { expose: false }));
     } else {
-      const url = `${BASE_URL}/notificationLogs/list?subscriberId=&type=&pageNo=&pageNo=`;
+      const url = `${BASE_URL}/notificationLogs/list?subscriberId=${payload.subscriberId}&type=${payload.type}&pageNo=${payload.pageNo}&limit=${payload.limit}`;
       axios.get(url).then(response => {
         return callback(response);
       }).catch((error) => {
