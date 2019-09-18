@@ -694,7 +694,7 @@ const subscribeToGroup = function (payload, BASE_URL, callback) {
         group: payload.group,
         subscribers: payload.subscribers
       };
-      const url = `${BASE_URL}/subscriberGroups/subscribe/${payload.group.id}}`;
+      const url = `${BASE_URL}/subscriberGroups/subscribe/${payload.group.id}`;
       axios.post(url, payloadData).then(response => {
         return callback(response);
       }).catch((error) => {
@@ -719,7 +719,7 @@ const unsubscribeToGroup = function (payload, BASE_URL, callback) {
         groupId: payload.groupId,
         subscriberId: payload.subscriberId
       };
-      const url = `${BASE_URL}/subscriberGroups/unsubscribeGroup/${payload.groupId}}/${payload.subscriberId}`;
+      const url = `${BASE_URL}/subscriberGroups/unsubscribeGroup/${payload.groupId}/${payload.subscriberId}`;
       axios.post(url, payloadData).then(response => {
         return callback(response);
       }).catch((error) => {
@@ -744,7 +744,7 @@ const notifyToGroup = function (payload, BASE_URL, callback) {
         eventName: payload.eventName,
         data: payload.data,
       };
-      const url = `${BASE_URL}/subscriberGroups/notify/group/${payload.groupId}}`;
+      const url = `${BASE_URL}/subscriberGroups/notify/group/${payload.groupId}`;
       axios.post(url,payloadData).then(response => {
         return callback(response);
       }).catch((error) => {
