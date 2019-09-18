@@ -13,7 +13,7 @@ const { APP_NOTIFICATION_TEMPLATE, EMAIL_NOTIFICATION_TEMPLATE, SMS_NOTIFICATION
   CREATEMESSAGE, READMESSAGE, DELETEMESSAGE, UPDATEMESSAGE, UPDATEMESSAGETEMPLATE,
   CHANNELEMAIL, SENDCAMPAIGNEMAIL, SENDTRANSACTIONALEMAIL, SENDPUSHNOTIFICATION, SENDWEBPUSHNOTIFICATION,
   CREATESUBSCRIBERGROUP, SUBSCRIBERBULKUPLOAD, LINKEVENTMESSAGE,
-  READNOTIFICATION, READALLNOTIFICATIONS, LISTNOTIFCATIONS
+  READNOTIFICATION, READALLNOTIFICATIONS, LISTNOTIFCATIONS, SUBSCRIBETOGROUP, UNSUBSCRIBETOGROUP, NOTIFYTOGROUP
 } = require('./config/constant.js');
 
 const isNull = function (val) {
@@ -89,6 +89,12 @@ function notificationModule(BASE_URL) {
       return subscriberBulkUpload(payload, BASE_URL, callback);
     } else if (payload.action === CREATESUBSCRIBERGROUP) {
       return createSubscriberGroup(payload, BASE_URL, callback);
+    }else if (payload.action === SUBSCRIBETOGROUP) {
+      return subscribeToGroup(payload, BASE_URL, callback);
+    } if (payload.action === UNSUBSCRIBETOGROUP) {
+      return unsubscribeToGroup(payload, BASE_URL, callback);
+    } if (payload.action === NOTIFYTOGROUP) {
+      return notifyToGroup(payload, BASE_URL, callback);
     } else if (payload.action === ADDSCHEDULEDEVENT) {
       return createScheduledEvent(payload, BASE_URL, callback);
     } else if (payload.action === DELETESCHEDULEDEVENT) {
@@ -650,17 +656,96 @@ const createSubscriberGroup = function (payload, BASE_URL, callback) {
     return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', { expose: false }));
   } else {
     payload = payload.meta;
-    if (isNull(payload.name)) {
-      return callback(new HttpErrors.BadRequest('Group name is mandatory.', { expose: false }));
+    if (!isJson(payload.group)) {
+      return callback(new HttpErrors.BadRequest('Invalid group detail.', {expose: false}));
+    } else if (isNull(payload.group.name)) {
+      return callback(new HttpErrors.BadRequest('Group name is mandatory.', {expose: false}));
     } else if (isNull(payload.subscribers) || payload.subscribers.length === 0) {
-      return callback(new HttpErrors.BadRequest('Add minimum one group subscriber.', { expose: false }));
+      return callback(new HttpErrors.BadRequest('Add minimum one group subscriber.', {expose: false}));
     } else {
       const payloadData = {
-        name: payload.name,
+        group: payload.group,
         subscribers: payload.subscribers
       };
       const url = `${BASE_URL}/subscriberGroups/group`;
       axios.post(url, payloadData).then(response => {
+        return callback(response);
+      }).catch((error) => {
+        let json = CircularJSON.stringify(error);
+        return callback(json);
+      });
+    }
+  }
+}
+
+const subscribeToGroup = function (payload, BASE_URL, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', {expose: false}));
+  } else {
+    payload = payload.meta;
+    if (!isJson(payload.group)) {
+      return callback(new HttpErrors.BadRequest('Invalid group detail.', {expose: false}));
+    } else if (isNull(payload.group.id)) {
+      return callback(new HttpErrors.BadRequest('Group id is mandatory.', {expose: false}));
+    } else if (isNull(payload.subscribers) || payload.subscribers.length === 0) {
+      return callback(new HttpErrors.BadRequest('Add minimum one group subscriber.', {expose: false}));
+    } else {
+      const payloadData = {
+        group: payload.group,
+        subscribers: payload.subscribers
+      };
+      const url = `${BASE_URL}/subscriberGroups/subscribe/${payload.group.id}`;
+      axios.post(url, payloadData).then(response => {
+        return callback(response);
+      }).catch((error) => {
+        let json = CircularJSON.stringify(error);
+        return callback(json);
+      });
+    }
+  }
+}
+
+const unsubscribeToGroup = function (payload, BASE_URL, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', {expose: false}));
+  } else {
+    payload = payload.meta;
+    if (isNull(payload.groupId)) {
+      return callback(new HttpErrors.BadRequest('Group id is mandatory.', {expose: false}));
+    } else if (isNull(payload.subscribers) || payload.subscribers.length === 0) {
+      return callback(new HttpErrors.BadRequest('Add minimum one group subscriber.', {expose: false}));
+    } else {
+      const payloadData = {
+        groupId: payload.groupId,
+        subscriberId: payload.subscriberId
+      };
+      const url = `${BASE_URL}/subscriberGroups/unsubscribeGroup/${payload.groupId}/${payload.subscriberId}`;
+      axios.post(url, payloadData).then(response => {
+        return callback(response);
+      }).catch((error) => {
+        let json = CircularJSON.stringify(error);
+        return callback(json);
+      });
+    }
+  }
+}
+
+const notifyToGroup = function (payload, BASE_URL, callback) {
+  if (!isJson(payload)) {
+    return callback(new HttpErrors.BadRequest('Payload must be a JSON object.', {expose: false}));
+  } else {
+    payload = payload.meta;
+    if (isNull(payload.groupId)) {
+      return callback(new HttpErrors.BadRequest('Group id is mandatory.', {expose: false}));
+    } else if (isNull(payload.eventName)) {
+      return callback(new HttpErrors.BadRequest('Event name is mandatory.', {expose: false}));
+    } else {
+      const payloadData = {
+        eventName: payload.eventName,
+        data: payload.data,
+      };
+      const url = `${BASE_URL}/subscriberGroups/notify/group/${payload.groupId}`;
+      axios.post(url,payloadData).then(response => {
         return callback(response);
       }).catch((error) => {
         let json = CircularJSON.stringify(error);
